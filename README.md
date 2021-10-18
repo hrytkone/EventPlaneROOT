@@ -11,3 +11,10 @@ Analysis code for calculating event plane resolution for FIT detectors (FV0 and 
     * run this if no correction files exist or they need updating
  * ./calcEventPlaneRes <infile.root> <outfile.root>
     * calculates the event planes and the components that are needed to calculate the resolution. These are saved into histograms for each detector
+
+
+## TO-DO
+
+ * Make so that bUseCorrections can be given as an argument
+ * Make better bash scripts:
+    * calcCorrections includes also calculation of the q-vectors
