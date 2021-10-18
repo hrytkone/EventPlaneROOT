@@ -1,0 +1,9 @@
+#!/bin/bash
+
+infile=${1}
+cent=${2}
+
+cmd="root -b -q 'src/CalculateCorrections.C(\"${infile}\", \"${cent}\")'"
+eval $cmd
+
+mv corr_*.txt corrections/.

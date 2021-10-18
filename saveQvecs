@@ -1,0 +1,34 @@
+#!/bin/bash
+
+outfile=${1}
+indir=${2}
+cent=${3}
+
+declare -a kinefiles
+for file in ${indir}/sim/*/o2sim_Kine_PPOnly.root
+#for file in ${pwd}o2sim_Kine_PPOnly.root
+do
+	kinefiles=(${kinefiles[@]} "$file")
+done
+
+declare -a fv0digitfiles
+for file in ${indir}/dig*/*/fv0digits.root
+#for file in ${pwd}fv0digits.root
+do
+	fv0digitfiles=(${fv0digitfiles[@]} "$file")
+done
+
+declare -a ft0digitfiles
+for file in ${indir}/dig*/*/ft0digits.root
+#for file in ${pwd}ft0digits.root
+do
+	ft0digitfiles=(${ft0digitfiles[@]} "$file")
+done
+
+nfiles=${#kinefiles[@]}
+
+for (( i=0; i<$nfiles; i++ ))
+do
+	cmd="root -b -q 'src/SaveQvecs.C(\"${kinefiles[i]}\", \"${fv0digitfiles[i]}\", \"${ft0digitfiles[i]}\", \"${outfile}\", \"${cent}\")'"
+	eval $cmd
+done
