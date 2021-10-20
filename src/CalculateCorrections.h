@@ -9,8 +9,8 @@ TFile *fin;
 TTree *inTree;
 
 TString detName[ndet] = {"FV0", "FT0A", "FT0C"};
-double corr[nCorrections];
 TString saveFileName[ndet];
+float corrections[nCorrections];
 float qvec[ndet][nq];
 TH2D *hQvec[ndet];
 

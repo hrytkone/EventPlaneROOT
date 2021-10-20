@@ -48,10 +48,10 @@ void SaveCorrections()
 {
     for (int idet=0; idet<ndet; idet++) {
         std::cout << "\nCalculating corrections.." << std::endl;
-        corr = CalculateCorrections(hQvec[idet]);
+        CalculateCorrections(hQvec[idet]);
         outputFile.open(saveFileName[idet].Data());
         for (int i = 0; i < nCorrections; i++) {
-            outputFile << corr[i] << "\n";
+            outputFile << corrections[i] << "\n";
         }
         outputFile.close();
         std::cout << "Corrections saved to file " << saveFileName[idet] << std::endl;
@@ -60,7 +60,7 @@ void SaveCorrections()
 
 void Print()
 {
-    std::cout << "<Q>      : " << corr[0] << "  " << corr[1] << std::endl;
-    std::cout << "a+-      : " << corr[4] << "  " << corr[5] << std::endl;
-    std::cout << "lambda+- : " << corr[6] << "  " << corr[7] << std::endl;
+    std::cout << "<Q>      : " << corrections[0] << "  " << corrections[1] << std::endl;
+    std::cout << "a+-      : " << corrections[4] << "  " << corrections[5] << std::endl;
+    std::cout << "lambda+- : " << corrections[6] << "  " << corrections[7] << std::endl;
 }

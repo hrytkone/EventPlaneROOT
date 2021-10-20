@@ -47,9 +47,9 @@ void DoCorrections(float &qx, float &qy, float *corrections)
     }
 }
 
-float *CalculateCorrections(TH2D *hQ)
+void CalculateCorrections(TH2D *hQ)
 {
-    static float corrections[8] = {0};
+    //static float corrections[8] = {0};
     float xmean, ymean, xdev, ydev, aplus, aminus, lambdaplus, lambdaminus;
     GetRecenteringCorrection(hQ, xmean, ymean);
     GetWidthCorrection(hQ, xdev, ydev);
