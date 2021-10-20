@@ -19,5 +19,6 @@ std::ofstream outputFile;
 void InitOutput(TString outfile);
 int LoadInput(TString infile);
 void FillHistos();
+void GetCorrections(TH2D *hQ);
 void SaveCorrections();
 void Print();

@@ -46,21 +46,3 @@ void DoCorrections(float &qx, float &qy, float *corrections)
         qy /= corrections[5];
     }
 }
-
-void CalculateCorrections(TH2D *hQ)
-{
-    //static float corrections[8] = {0};
-    float xmean, ymean, xdev, ydev, aplus, aminus, lambdaplus, lambdaminus;
-    GetRecenteringCorrection(hQ, xmean, ymean);
-    GetWidthCorrection(hQ, xdev, ydev);
-    GetTwistAndRescaleCorrection(hQ, aplus, aminus, lambdaplus, lambdaminus);
-    corrections[0] = xmean;
-    corrections[1] = ymean;
-    corrections[2] = xdev;
-    corrections[3] = ydev;
-    corrections[4] = aplus;
-    corrections[5] = aminus;
-    corrections[6] = lambdaplus;
-    corrections[7] = lambdaminus;
-    return corrections;
-}
