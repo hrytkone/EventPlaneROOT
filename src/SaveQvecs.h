@@ -8,6 +8,8 @@ const TString detName[ndet] = {"FV0", "FT0A", "FT0C"};
 bool bDoCorrections = true;
 TFile *fout;
 TTree *outTree;
+TFile *finTPCeff; // efficiency for TPC
+TH1D* hCoeff;
 std::ifstream corrInFile;
 
 float corr[ndet][ncorr];
@@ -49,3 +51,4 @@ void SumQvec(TComplex &Qvec, double nch, int chno, TString det);
 double GetFV0Phi(int chno);
 double GetFT0APhi(int chno);
 double GetFT0CPhi(int chno);
+double GetEffFromHisto(TH1D* h, double pt);

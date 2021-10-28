@@ -50,6 +50,12 @@ int LoadInput(TString nameKineFile, TString nameFV0DigitFile, TString nameFT0Dig
         return 0;
     }
 
+    finTPCeff = TFile::Open("Eff-LHC16q-pPb_MC_LHC17f2b_fast_1154_20201205-1425.root", "READ");
+    if (!finTPCeff) {
+        std::cout << "Could not find efficiency for TPC, skip efficiency calculation" << std::endl;
+    }
+    hCoeff = (TH1D*)fIn->Get("Efficiency/hCor000004");
+
     fKineTree = (TTree*)finKine->Get("o2sim");
     fFV0DigitTree = (TTree*)finFV0Digit->Get("o2sim");
     fFT0DigitTree = (TTree*)finFT0Digit->Get("o2sim");
@@ -122,15 +128,11 @@ void FillQvecBC(UInt_t ient)
     for (auto &t : *mctrack) {
 
         if (t.GetPt() < 0.2) continue;
+        if (gRandom->Uniform(1.) > GetEffFromHisto(hCoeff, t.GetPt())) continue;
 
         Int_t pid = t.GetPdgCode();
-        //if (TMath::Abs(pid)>1000000000) continue;
-        //if (TDatabasePDG::Instance()->GetParticle(pid)==NULL) continue;
         Double_t charge = TDatabasePDG::Instance()->GetParticle(pid)->Charge();
         if (charge==0.0) continue;
-        //double len = TMath::Sqrt(t.Vx()*t.Vx() + t.Vy()*t.Vy() + t.Vz()*t.Vz());
-        //if (len > 0.5) continue;
-        //if (!isHadron(pid)) continue;
 
         double eta = t.GetEta();
         double phi = TMath::ATan2(t.Py(), t.Px());
@@ -301,4 +303,25 @@ double GetFT0APhi(int chno)
 double GetFT0CPhi(int chno)
 {
     return TMath::ATan2(ft0cy[chno], ft0cx[chno]);
+}
+
+//Search pt bin from efficiency histo and return the content
+//If pt is less than first bin then return first bin.
+//If pt is more than last bin then return last bin.
+double GetEffFromHisto(TH1D* h, double pt)
+{
+    int iLastBin = h->GetNbinsX();
+
+    if(pt<h->GetBinLowEdge(1)) return h->GetBinContent(1);
+    if(pt>h->GetBinLowEdge(iLastBin)) return h->GetBinContent(iLastBin);
+    for(int i=1; i<iLastBin; i++) {
+        if(pt>h->GetBinLowEdge(i) && pt<h->GetBinLowEdge(i+1)) {
+            if(h->GetBinContent(i)>1.0) cout << "Warning: efficiency>1.0!" << endl;
+            if(h->GetBinContent(i)<0.0) cout << "Warning: efficiency<0.0!" << endl;
+            return h->GetBinContent(i);
+        }
+
+    }
+    cout << "Warning: efficiency not found!" << endl;
+    return DBL_MAX;
 }
