@@ -1,8 +1,12 @@
 const int ncent = 1;
 const int ndet = 3;
 
+TString colsys = "Pb#font[122]{-}Pb";
+TString energy = "2.76 TeV";
+
 float cent[ncent+1] = {20., 30.};
-TString files[ncent] = {"../cent20-30.root"};
+TString files[ncent] = {"../ep_cent20-30_276TeV_corrected.root"};
+//TString files[ncent] = {"../cent20-30_corr_res.root"};
 TString detname[ndet] = {"FT0C", "FV0", "FT0A"};
 TString legentry[ndet] = {"FT0-C", "FV0", "FT0-A"};
 EColor mColor[ndet] = {kRed, kBlue, kBlack};
@@ -19,17 +23,16 @@ float res[ndet][ncent];
 float resErr[ndet][ncent];
 
 void LoadData();
+void SetStyle(Bool_t graypalette);
 void GetResAndErr(int icent, int idet);
 void ConfigPlots();
 void PlotToCanvas();
 
 void PlotRes()
 {
-    gStyle->SetOptStat(0);
-    gStyle->SetLineScalePS(1);
-    //gStyle->SetTitleH(0.1);
-
+    SetStyle(0);
     LoadData();
+
 
     for (int idet=0; idet<ndet; idet++) {
         gRes[idet] = new TGraphErrors();
@@ -43,6 +46,7 @@ void PlotRes()
     PlotToCanvas();
 }
 
+//________________________________
 void LoadData()
 {
     for (int icent=0; icent<ncent; icent++) {
@@ -54,6 +58,48 @@ void LoadData()
             hRAC[icent][idet] = (TH1D*)fin[icent]->Get(Form("hRAC_%s", detname[idet].Data()));
         }
     }
+}
+
+void SetStyle(Bool_t graypalette)
+{
+    cout << "Setting style!" << endl;
+
+    gStyle->Reset("Plain");
+    gStyle->SetOptTitle(0);
+    gStyle->SetOptStat(0);
+    //gStyle->SetLineScalePS(1);
+    if(graypalette) gStyle->SetPalette(8,0);
+    else gStyle->SetPalette(1);
+    gStyle->SetCanvasColor(10);
+    gStyle->SetCanvasBorderMode(0);
+    gStyle->SetFrameLineWidth(1);
+    gStyle->SetFrameFillColor(kWhite);
+    gStyle->SetPadColor(10);
+    gStyle->SetPadTickX(0);
+    gStyle->SetPadTickY(0);
+    gStyle->SetPadBottomMargin(0.15);
+    gStyle->SetPadLeftMargin(0.15);
+    gStyle->SetHistLineWidth(1);
+    gStyle->SetHistLineColor(kRed);
+    gStyle->SetFuncWidth(2);
+    gStyle->SetFuncColor(kGreen);
+    gStyle->SetLineWidth(1);
+    gStyle->SetLabelSize(0.035,"xyz");
+    gStyle->SetLabelOffset(0.01,"y");
+    gStyle->SetLabelOffset(0.01,"x");
+    gStyle->SetLabelColor(kBlack,"xyz");
+    gStyle->SetTitleSize(0.035,"xyz");
+    gStyle->SetTitleOffset(1.25,"y");
+    gStyle->SetTitleOffset(1.2,"x");
+    gStyle->SetTitleFillColor(kWhite);
+    gStyle->SetTextSizePixels(26);
+    gStyle->SetTextFont(42);
+    //  gStyle->SetTickLength(0.04,"X");  gStyle->SetTickLength(0.04,"Y");
+
+    gStyle->SetLegendBorderSize(0);
+    gStyle->SetLegendFillColor(kWhite);
+    //  gStyle->SetFillColor(kWhite);
+    gStyle->SetLegendFont(42);
 }
 
 void GetResAndErr(int icent, int idet)
@@ -73,19 +119,19 @@ void GetResAndErr(int icent, int idet)
 
 void ConfigPlots()
 {
-    leg = new TLegend(0.70, 0.70, 0.85, 0.85);
-    leg->SetFillStyle(0); leg->SetBorderSize(0); leg->SetTextSize(0.025);
-    leg->SetHeader("#sqrt{s_{NN}} = 5.5 TeV");
+    leg = new TLegend(0.6, 0.63, 0.72, 0.79);
+    leg->SetFillStyle(0); leg->SetBorderSize(0); leg->SetTextSize(gStyle->GetTextSize()*0.5);
+    leg->SetHeader(Form("%s #sqrt{#it{s}_{NN}} = %s", colsys.Data(), energy.Data()));
     for (int idet=0; idet<ndet; idet++) {
         leg->AddEntry(gRes[idet], legentry[idet], "p");
         gRes[idet]->SetTitle("; centrality (%); R_{2}");
-        gRes[idet]->GetXaxis()->SetLabelSize(0.025);
-        gRes[idet]->GetXaxis()->SetTitleSize(0.025);
-        gRes[idet]->GetXaxis()->CenterTitle();
+        //gRes[idet]->GetXaxis()->SetLabelSize(0.025);
+        //gRes[idet]->GetXaxis()->SetTitleSize(0.025);
+        //gRes[idet]->GetXaxis()->CenterTitle();
         gRes[idet]->GetXaxis()->SetLimits(0., 80.);
-        gRes[idet]->GetYaxis()->SetLabelSize(0.025);
-        gRes[idet]->GetYaxis()->SetTitleSize(0.025);
-        gRes[idet]->GetYaxis()->CenterTitle();
+        //gRes[idet]->GetYaxis()->SetLabelSize(0.025);
+        //gRes[idet]->GetYaxis()->SetTitleSize(0.025);
+        //gRes[idet]->GetYaxis()->CenterTitle();
         gRes[idet]->GetYaxis()->SetRangeUser(0., 1.);
         gRes[idet]->SetMarkerColor(mColor[idet]);
         gRes[idet]->SetMarkerStyle(20);
@@ -102,4 +148,14 @@ void PlotToCanvas()
             gRes[idet]->Draw("P SAME");
     }
     leg->Draw("SAME");
+
+    TLatex * tex = new TLatex(0.1,0.1, "ALICE Preliminary");
+    tex->SetNDC();
+    tex->SetTextFont(42);
+    //tex->Draw();
+
+    TLatex * texsim = new TLatex(0.602,0.8, "Simulation");
+    texsim->SetNDC();
+    texsim->SetTextSize(gStyle->GetTextSize()*0.5);
+    texsim->Draw();
 }

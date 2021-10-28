@@ -4,17 +4,16 @@ Analysis code for calculating event plane resolution for FIT detectors (FV0 and 
 
 ## Usage:
 
- * ./saveQvecs <outfile.root> <\path\to\input> <cent>
-    * calculates Q-vectors from simulation files in given path (check the path if files not found). outfile is the output file name, give centtrality class (for example 20-30)
- * ./calcCorrections <infile.root> <cent>
-    * calculates the corrections for the even plane from raw q-vectors. Needs input file generated with saveQvecs without corrections (turn bDoCorrections off in SaveQvecs.h)
+ * ./saveQvecs <output.root> <\path\to\input> <comment> <docorrections>
+    * calculates Q-vectors from simulation files in given path (check the path if files not found). outputi.root the output file name, comment gives label to the correction files (for example cent class is good)
+ * ./calcCorrections <output.root> <\path\to\input> <comment>
+    * same arguments as above, runs first saveQvecs and then calculates corrections from that output
     * run this if no correction files exist or they need updating
- * ./calcEventPlaneRes <infile.root> <outfile.root>
+ * ./calcEventPlaneRes <output.root> <\path\to\input> <correction file label> <docorrections>
     * calculates the event planes and the components that are needed to calculate the resolution. These are saved into histograms for each detector
+    * runs first saveQvecs and saves Q-vectors to output.root, output for resolutions is labeled as "res_output.root"
 
 
 ## TO-DO
 
- * Make so that bUseCorrections can be given as an argument
- * Make better bash scripts:
-    * calcCorrections includes also calculation of the q-vectors
+ * Nothing at this point

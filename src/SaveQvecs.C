@@ -3,8 +3,10 @@
 #include "Const.h"
 
 void SaveQvecs(TString kinefile="", TString fv0digitfile="", TString ft0digitfile="",
-                TString outfile="output.root", TString cent="20-30")
+                TString outfile="output.root", TString cent="20-30", bool docorr=false)
 {
+    bDoCorrections = docorr;
+
     int isOpen = LoadInput(kinefile, fv0digitfile, ft0digitfile);
     if (!isOpen) return;
     if (bDoCorrections) LoadCorrections(cent);

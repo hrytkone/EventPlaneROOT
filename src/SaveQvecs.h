@@ -3,9 +3,9 @@ const double bmax = 20.;
 const int nq = 2;
 const int ndet = 3;
 const int ncorr = 8;
-const bool bDoCorrections = true;
 const TString detName[ndet] = {"FV0", "FT0A", "FT0C"};
 
+bool bDoCorrections = true;
 TFile *fout;
 TTree *outTree;
 std::ifstream corrInFile;
