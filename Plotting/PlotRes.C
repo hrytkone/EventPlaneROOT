@@ -2,11 +2,11 @@ const int ncent = 1;
 const int ndet = 3;
 
 TString colsys = "Pb#font[122]{-}Pb";
-TString energy = "2.76 TeV";
+TString energy = "5.5 TeV";
 
 float cent[ncent+1] = {20., 30.};
-TString files[ncent] = {"../ep_cent20-30_276TeV_corrected.root"};
-//TString files[ncent] = {"../cent20-30_corr_res.root"};
+//TString files[ncent] = {"../res_cent20-30_tpc-eff_corr.root"};
+TString files[ncent] = {"../cent20-30_corr_res.root"};
 TString detname[ndet] = {"FT0C", "FV0", "FT0A"};
 TString legentry[ndet] = {"FT0-C", "FV0", "FT0-A"};
 EColor mColor[ndet] = {kRed, kBlue, kBlack};

@@ -314,9 +314,9 @@ double GetEffFromHisto(TH1D* h, double pt)
     int iLastBin = h->GetNbinsX();
 
     if(pt<h->GetBinLowEdge(1)) return h->GetBinContent(1);
-    if(pt>h->GetBinLowEdge(iLastBin)) return h->GetBinContent(iLastBin);
+    if(pt>=h->GetBinLowEdge(iLastBin)) return h->GetBinContent(iLastBin);
     for(int i=1; i<iLastBin; i++) {
-        if(pt>h->GetBinLowEdge(i) && pt<h->GetBinLowEdge(i+1)) {
+        if(pt>=h->GetBinLowEdge(i) && pt<h->GetBinLowEdge(i+1)) {
             if(h->GetBinContent(i)>1.0) cout << "Warning: efficiency>1.0!" << endl;
             if(h->GetBinContent(i)<0.0) cout << "Warning: efficiency<0.0!" << endl;
             return h->GetBinContent(i);
