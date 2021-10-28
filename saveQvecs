@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SECONDS=0
+
 PROG=`basename $0`
 if [ $# -ne 4 ]
 then
@@ -37,3 +39,6 @@ do
 	cmd="root -b -q 'src/SaveQvecs.C(\"${kinefiles[i]}\", \"${fv0digitfiles[i]}\", \"${ft0digitfiles[i]}\", \"${outfile}\", \"${comment}\", \"${docorr}\")'"
 	eval $cmd
 done
+
+duration=$SECONDS
+echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed."

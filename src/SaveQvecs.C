@@ -323,6 +323,6 @@ double GetEffFromHisto(TH1D* h, double pt)
         }
 
     }
-    cout << "Warning: efficiency not found!" << endl;
+    cout << "Warning: efficiency not found! pT = " << pt << endl;
     return DBL_MAX;
 }
