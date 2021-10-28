@@ -3,9 +3,9 @@
 #include "Const.h"
 
 void SaveQvecs(TString kinefile="", TString fv0digitfile="", TString ft0digitfile="",
-                TString outfile="output.root", TString cent="20-30", bool docorr=false)
+                TString outfile="output.root", TString cent="20-30", TString docorr="1")
 {
-    bDoCorrections = docorr;
+    bDoCorrections = atoi(docorr);
 
     int isOpen = LoadInput(kinefile, fv0digitfile, ft0digitfile);
     if (!isOpen) return;
@@ -50,11 +50,12 @@ int LoadInput(TString nameKineFile, TString nameFV0DigitFile, TString nameFT0Dig
         return 0;
     }
 
-    finTPCeff = TFile::Open("Eff-LHC16q-pPb_MC_LHC17f2b_fast_1154_20201205-1425.root", "READ");
-    if (!finTPCeff) {
+    finTPCeff = TFile::Open("src/Eff-LHC16q-pPb_MC_LHC17f2b_fast_1154_20201205-1425.root", "READ");
+    if (!finTPCeff && bUseTPCeff) {
         std::cout << "Could not find efficiency for TPC, skip efficiency calculation" << std::endl;
+    } else {
+        hCoeff = (TH1D*)finTPCeff->Get("Efficiency/hCor000004");
     }
-    hCoeff = (TH1D*)fIn->Get("Efficiency/hCor000004");
 
     fKineTree = (TTree*)finKine->Get("o2sim");
     fFV0DigitTree = (TTree*)finFV0Digit->Get("o2sim");
@@ -128,7 +129,7 @@ void FillQvecBC(UInt_t ient)
     for (auto &t : *mctrack) {
 
         if (t.GetPt() < 0.2) continue;
-        if (gRandom->Uniform(1.) > GetEffFromHisto(hCoeff, t.GetPt())) continue;
+        if (bUseTPCeff && gRandom->Uniform(1.) > GetEffFromHisto(hCoeff, t.GetPt())) continue;
 
         Int_t pid = t.GetPdgCode();
         Double_t charge = TDatabasePDG::Instance()->GetParticle(pid)->Charge();

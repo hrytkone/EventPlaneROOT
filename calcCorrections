@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PROG=`basename $0`
-if [ $# -ne 9 ]
+if [ $# -ne 3 ]
 then
-    echo "Usage: ${PROG} [output.root] [\input\dir] [comment (centrality etc.)]"
+    echo "Usage: ${PROG} [output.root] [/input/dir] [comment (centrality etc.)]"
     exit;
 fi
 
@@ -11,7 +11,7 @@ outfile=${1}
 indir=${2}
 comment=${3} # comment to add to the correction file names, for example centrality, energy etc
 
-.\calcCorrections ${outfile} ${indir} ${comment} 0
+./saveQvecs ${outfile} ${indir} ${comment} 0
 
 cmd="root -b -q 'src/CalculateCorrections.C(\"${outfile}\", \"${comment}\")'"
 eval $cmd

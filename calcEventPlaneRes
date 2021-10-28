@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PROG=`basename $0`
-if [ $# -ne 9 ]
+if [ $# -ne 4 ]
 then
-    echo "Usage: ${PROG} [output.root] [\input\dir] [correcition file LABEL (corr_DET_LABEL.txt)] [docorr (0/1)]"
+    echo "Usage: ${PROG} [output.root] [/input/dir] [correcition file LABEL (corr_DET_LABEL.txt)] [docorr (0/1)]"
     exit;
 fi
 
@@ -12,7 +12,7 @@ indir=${2}
 comment=${3} # comment to add to the correction file names, for example centrality, energy etc
 docorr=${4}
 
-.\calcCorrections ${outfile} ${indir} ${comment} ${docorr}
+./saveQvecs ${outfile} ${indir} ${comment} ${docorr}
 
 cmd="root -b -q 'src/EventPlaneRes.C(\"${outfile}\", \"res_${outfile}\")'"
 eval $cmd

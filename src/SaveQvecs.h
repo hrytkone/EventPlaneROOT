@@ -6,6 +6,7 @@ const int ncorr = 8;
 const TString detName[ndet] = {"FV0", "FT0A", "FT0C"};
 
 bool bDoCorrections = true;
+bool bUseTPCeff = true;
 TFile *fout;
 TTree *outTree;
 TFile *finTPCeff; // efficiency for TPC

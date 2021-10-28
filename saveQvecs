@@ -1,9 +1,9 @@
 #!/bin/bash
 
 PROG=`basename $0`
-if [ $# -ne 9 ]
+if [ $# -ne 4 ]
 then
-    echo "Usage: ${PROG} [output.root] [\input\dir] [comment (centrality etc.)] [docorrections (0/1)]"
+    echo "Usage: ${PROG} [output.root] [/input/dir] [comment (centrality etc.)] [docorrections (0/1)]"
     exit;
 fi
 
