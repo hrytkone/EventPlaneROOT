@@ -43,7 +43,7 @@ int LoadInput(TString nameKineFile, TString nameFV0DigitFile, TString nameFT0Dig
 {
     if (gSystem->AccessPathName(nameKineFile.Data()) ||
         gSystem->AccessPathName(nameFV0DigitFile.Data()) ||
-        gSystem->AccessPathName(nameFT0DigitFile.Data()) {
+        gSystem->AccessPathName(nameFT0DigitFile.Data())) {
 		std::cout << "Input files not found! Skip.." << std::endl;
 		return 0;
 	}
