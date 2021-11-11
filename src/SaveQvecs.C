@@ -41,14 +41,16 @@ void InitOutput(TString outfile)
 
 int LoadInput(TString nameKineFile, TString nameFV0DigitFile, TString nameFT0DigitFile)
 {
+    if (gSystem->AccessPathName(nameKineFile.Data()) ||
+        gSystem->AccessPathName(nameFV0DigitFile.Data()) ||
+        gSystem->AccessPathName(nameFT0DigitFile.Data()) {
+		std::cout << "Input files not found! Skip.." << std::endl;
+		return 0;
+	}
+
     finKine = TFile::Open(nameKineFile, "READ");
     finFV0Digit = TFile::Open(nameFV0DigitFile, "READ");
     finFT0Digit = TFile::Open(nameFT0DigitFile, "READ");
-
-    if (!finKine || !finFV0Digit || !finFT0Digit) {
-        std::cout << "Could not open the files, skipping them.." << std::endl;
-        return 0;
-    }
 
     finTPCeff = TFile::Open("src/Eff-LHC16q-pPb_MC_LHC17f2b_fast_1154_20201205-1425.root", "READ");
     if (!finTPCeff && bUseTPCeff) {

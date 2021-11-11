@@ -1,12 +1,14 @@
-const int ncent = 1;
+const int ncent = 3;
 const int ndet = 3;
 
 TString colsys = "Pb#font[122]{-}Pb";
 TString energy = "5.5 TeV";
 
-float cent[ncent+1] = {20., 30.};
+float cent[ncent+1] = {0., 5., 10., 20., 30., 40., 50., 60., 70.};
 //TString files[ncent] = {"../res_cent20-30_tpc-eff_corr.root"};
-TString files[ncent] = {"../cent20-30_corr_res.root"};
+TString files[ncent] = {"../res_ep_cent00-05.root", "../res_ep_cent05-10.root", "../res_ep_cent10-20.root",
+                        "../cent20-30_corr_res.root", "../res_ep_cent30-40.root", "../res_ep_cent40-50.root",
+                        "../res_ep_cent50-60.root", "../res_ep_cent60-70.root"};
 TString detname[ndet] = {"FT0C", "FV0", "FT0A"};
 TString legentry[ndet] = {"FT0-C", "FV0", "FT0-A"};
 EColor mColor[ndet] = {kRed, kBlue, kBlack};
@@ -16,6 +18,7 @@ TH1D *hRAB[ncent][ndet];
 TH1D *hRAC[ncent][ndet];
 TH1D *hRBC[ncent];
 TGraphErrors *gRes[ndet];
+TGraphErrors *gResV0A;
 TLegend *leg;
 TCanvas *c1;
 
@@ -33,7 +36,6 @@ void PlotRes()
     SetStyle(0);
     LoadData();
 
-
     for (int idet=0; idet<ndet; idet++) {
         gRes[idet] = new TGraphErrors();
         for (int icent=0; icent<ncent; icent++) {
@@ -42,6 +44,10 @@ void PlotRes()
             gRes[idet]->SetPointError(icent, (cent[icent+1]-cent[icent])/2., resErr[idet][icent]);
         }
     }
+
+    gResV0A = new TGraphErrors();
+    gResV0A->SetPoint(0, cent[1] + (cent[2]-cent[1])/2., 0.6357);
+
     ConfigPlots();
     PlotToCanvas();
 }
@@ -136,6 +142,9 @@ void ConfigPlots()
         gRes[idet]->SetMarkerColor(mColor[idet]);
         gRes[idet]->SetMarkerStyle(20);
     }
+    gResV0A->SetMarkerColor(kBlue);
+    gResV0A->SetMarkerStyle(24);
+    //leg->AddEntry(gResV0A, "VZERO-A", "p");
 }
 
 void PlotToCanvas()
@@ -148,6 +157,8 @@ void PlotToCanvas()
             gRes[idet]->Draw("P SAME");
     }
     leg->Draw("SAME");
+
+    //gResV0A->Draw("P SAME");
 
     TLatex * tex = new TLatex(0.1,0.1, "ALICE Preliminary");
     tex->SetNDC();
