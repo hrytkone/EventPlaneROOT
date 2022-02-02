@@ -78,6 +78,11 @@ void LoadCorrections(TString cent)
 {
     for (int idet=0; idet<ndet; idet++) {
         corrInFile.open(Form("corrections/corr_%s_%s.txt", detName[idet].Data(), cent.Data()));
+        if (corrInFile.fail()) {
+            std::cout << Form("corrections/corr_%s_%s.txt", detName[idet].Data(), cent.Data()) 
+                      << " could not be found, not loading corrections" << std::endl; 
+            continue;
+        }
         std::string line;
         int icorr = 0;
         while (std::getline(corrInFile, line)) {
@@ -113,6 +118,9 @@ void FillQvectors()
         FillQvecBC(ient);
         fv0bcbegin = FillQvecFV0(ient, fv0bcbegin);
         ft0bcbegin = FillQvecFT0(ient, ft0bcbegin);
+
+        if (!GoodEvent()) continue;
+
         if (bDoCorrections) {
             DoCorrections(qvecFV0[0], qvecFV0[1], corr[0]);
             DoCorrections(qvecFT0A[0], qvecFT0A[1], corr[1]);
@@ -130,7 +138,7 @@ void FillQvecBC(UInt_t ient)
     int nTracksB = 0, nTracksC = 0;
     for (auto &t : *mctrack) {
 
-        if (t.GetPt() < 0.2) continue;
+        if (t.GetPt() < 0.2 || t.GetPt() > 5.) continue;
         if (bUseTPCeff && gRandom->Uniform(1.) > GetEffFromHisto(hCoeff, t.GetPt())) continue;
 
         Int_t pid = t.GetPdgCode();
@@ -173,7 +181,7 @@ int FillQvecFV0(UInt_t ient, int bcbegin)
         if (lb.size() > 0) {
             labelEvent = lb[0].getEventID();
         } else {
-            //std::cout << "Problem with labels" << std::endl;
+            std::cout << "FV0 : Problem with labels" << std::endl;
             continue;
         }
 
@@ -181,7 +189,7 @@ int FillQvecFV0(UInt_t ient, int bcbegin)
         if (labelEvent != ient) return ibc;
         prevLabelEvent = labelEvent;
 
-        double charge;
+        float charge;
         int channel;
         const auto &bcd = fv0BCData[ibc];
         int chEnt = bcd.ref.getFirstEntry();
@@ -189,12 +197,23 @@ int FillQvecFV0(UInt_t ient, int bcbegin)
             const auto &chd = fv0ChData[chEnt++];
             charge = chd.chargeAdc;
             channel = chd.pmtNumber;
+            if (chd.chargeAdc<0) cout << channel << " " << chd.chargeAdc << endl;
             SumQvec(Qvec, charge, channel, "FV0");
             signalSum += charge;
         }
 
+        chEnt = bcd.ref.getFirstEntry();
         if (signalSum != 0) {
-            Qvec /= signalSum;
+            Qvec /= TMath::Sqrt(signalSum);
+            if (qvecFV0[0]==qvecFV0[1]) {
+                //cout << "Qvec : " << qvecFV0[0] << " " << qvecFV0[1] << endl;
+                for (int ich = 0; ich < bcd.ref.getEntries(); ich++) { // Go through FV0 channels
+                    const auto &chd = fv0ChData[chEnt++];
+                    charge = (unsigned short)chd.chargeAdc;
+                    channel = chd.pmtNumber;
+                    //cout << "\tchannel " << channel << "   charge : " << charge << endl; 
+                }
+            }
             qvecFV0[0] = Qvec.Re();
             qvecFV0[1] = Qvec.Im();
         } else {
@@ -220,7 +239,7 @@ int FillQvecFT0(UInt_t ient, int bcbegin)
         if (lb.size() > 0) {
             labelEvent = lb[0].getEventID();
         } else {
-            std::cout << "Problem with labels" << std::endl;
+            std::cout << "FT0 : Problem with labels" << std::endl;
             continue;
         }
 
@@ -246,7 +265,7 @@ int FillQvecFT0(UInt_t ient, int bcbegin)
         }
 
         if (signalSumFT0A != 0) {
-            QvecFT0A /= signalSumFT0A;
+            QvecFT0A /= TMath::Sqrt(signalSumFT0A);
             qvecFT0A[0] = QvecFT0A.Re();
             qvecFT0A[1] = QvecFT0A.Im();
         } else {
@@ -255,7 +274,7 @@ int FillQvecFT0(UInt_t ient, int bcbegin)
         }
 
         if (signalSumFT0C != 0) {
-            QvecFT0C /= signalSumFT0C;
+            QvecFT0C /= TMath::Sqrt(signalSumFT0C);
             qvecFT0C[0] = QvecFT0C.Re();
             qvecFT0C[1] = QvecFT0C.Im();
         } else {
@@ -291,16 +310,25 @@ double GetFV0Phi(int chno)
         {41, 8}, {33, 9}, {40, 10}, {32, 11}, {44, 12}, {36, 13}, {45, 14}, {37, 15}
     };
 
+    double phi = 0.;
+    int iring = -1;
     if (chno>31) { // 5th ring has 16 segments
-        return pi/16.0 + (pmtMapBigCh[chno])*pi/8.0 - pi;
+        phi = pi/16.0 + (pmtMapBigCh[chno])*pi/8.0 - pi;
+        iring = 4;
     } else {
-        return pi/8.0 + (pmtMapSmallCh[chno%8])*pi/4.0 - pi;
+        phi = pi/8.0 + (pmtMapSmallCh[chno%8])*pi/4.0 - pi;
+        iring = chno/8;
     }
+    if (iring < 0) std::cout << "Ring not found!" << std::endl;
+    double x = fv0ringMidPoint[iring]*TMath::Cos(phi); 
+    double y = fv0ringMidPoint[iring]*TMath::Sin(phi); 
+    //return TMath::ATan2(y+asideOffsetX, x+asideOffsetY);
+    return phi;
 }
 
 double GetFT0APhi(int chno)
 {
-    return TMath::ATan2(ft0ay[chno], ft0ax[chno]);
+    return TMath::ATan2(ft0ay[chno]+asideOffsetY, ft0ax[chno]+asideOffsetX);
 }
 
 double GetFT0CPhi(int chno)
@@ -327,4 +355,16 @@ double GetEffFromHisto(TH1D* h, double pt)
     }
     cout << "Warning: efficiency not found! pT = " << pt << endl;
     return DBL_MAX;
+}
+
+bool GoodEvent()
+{
+    if (qvecFV0[0]==0. && qvecFV0[1]==0.) return false;
+    if (qvecFT0A[0]==0. && qvecFT0A[1]==0.) return false;
+    if (qvecFT0C[0]==0. && qvecFT0C[1]==0.) return false;
+
+    if (TMath::Abs(qvecFV0[0])>100. || TMath::Abs(qvecFV0[1])>100.) return false;
+    if (TMath::Abs(qvecFT0A[0])>100. || TMath::Abs(qvecFT0A[1])>100.) return false;
+    if (TMath::Abs(qvecFT0C[0])>100. || TMath::Abs(qvecFT0C[1])>100.) return false;
+    return true;
 }

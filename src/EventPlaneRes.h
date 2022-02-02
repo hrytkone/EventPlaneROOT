@@ -21,6 +21,9 @@ TH1D *hEPA[ndet];
 TH1D *hEPB;
 TH1D *hEPC;
 
+// To check Q-vec dist
+TH2D *hQvec[ndet];
+
 int LoadInput(TString infile);
 void InitOutput(TString outfile);
 float GetEventPlane(float qx, float qy);

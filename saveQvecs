@@ -21,13 +21,13 @@ do
 done
 
 declare -a fv0digitfiles
-for file in ${indir}/dig*/*/fv0digits.root
+for file in ${indir}/dig_5Hz-mips8/*/fv0digits.root
 do
 	fv0digitfiles=(${fv0digitfiles[@]} "$file")
 done
 
 declare -a ft0digitfiles
-for file in ${indir}/dig*/*/ft0digits.root
+for file in ${indir}/dig_5Hz-mips8/*/ft0digits.root
 do
 	ft0digitfiles=(${ft0digitfiles[@]} "$file")
 done

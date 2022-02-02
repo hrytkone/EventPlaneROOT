@@ -18,7 +18,7 @@ void GetTwistAndRescaleCorrection(TH2D *hQ, float &aplus, float &aminus, float &
 
     float b = rho*sigmax*sigmay*TMath::Sqrt(2.0*(sigmax*sigmax + sigmay*sigmay
                 - 2.0*sigmax*sigmay*TMath::Sqrt(1.0 - rho*rho))/((sigmax*sigmax
-                + sigmay*sigmay)*(sigmax*sigmax + sigmay*sigmay)
+                - sigmay*sigmay)*(sigmax*sigmax - sigmay*sigmay)
                 + 4.0*(sigmax*sigmay*rho)*(sigmax*sigmay*rho)));
 
     aplus = TMath::Sqrt(2.0*sigmax*sigmax - b*b);

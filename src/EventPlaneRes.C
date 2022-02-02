@@ -13,8 +13,10 @@ void EventPlaneRes(TString infile, TString outfile)
 
         epB = GetEventPlane(qvecB[0], qvecB[1]);
         epC = GetEventPlane(qvecC[0], qvecC[1]);
-        for (int idet=0; idet<ndet; idet++)
+        for (int idet=0; idet<ndet; idet++) {
+            hQvec[idet]->Fill(qvecA[idet][0], qvecA[idet][1]);
             epA[idet] = GetEventPlane(qvecA[idet][0], qvecA[idet][1]);
+        }
 
         FillHistos();
     }
@@ -41,13 +43,14 @@ int LoadInput(TString infile)
 void InitOutput(TString outfile)
 {
     fout = TFile::Open(outfile, "RECREATE");
-    hEPB = new TH1D("hEPB", "hEPB", 201, -TMath::Pi()/2.0, TMath::Pi()/2.0);
-    hEPC = new TH1D("hEPC", "hEPC", 201, -TMath::Pi()/2.0, TMath::Pi()/2.0);
-    hRBC = new TH1D("hRBC", "hRBC", 401, -1.0, 1.0);
+    hEPB = new TH1D("hEPB", "hEPB", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
+    hEPC = new TH1D("hEPC", "hEPC", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
+    hRBC = new TH1D("hRBC", "hRBC", 400, -1.0, 1.0);
     for (int idet=0; idet<ndet; idet++) {
-        hEPA[idet] = new TH1D(Form("hEPA_%s", detName[idet].Data()), Form("hEPA_%s", detName[idet].Data()), 201, -TMath::Pi()/2.0, TMath::Pi()/2.0);
-        hRAB[idet] = new TH1D(Form("hRAB_%s", detName[idet].Data()), Form("hRAB_%s", detName[idet].Data()), 401, -1.0, 1.0);
-        hRAC[idet] = new TH1D(Form("hRAC_%s", detName[idet].Data()), Form("hRAC_%s", detName[idet].Data()), 401, -1.0, 1.0);
+        hEPA[idet] = new TH1D(Form("hEPA_%s", detName[idet].Data()), Form("hEPA_%s", detName[idet].Data()), 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
+        hRAB[idet] = new TH1D(Form("hRAB_%s", detName[idet].Data()), Form("hRAB_%s", detName[idet].Data()), 400, -1.0, 1.0);
+        hRAC[idet] = new TH1D(Form("hRAC_%s", detName[idet].Data()), Form("hRAC_%s", detName[idet].Data()), 400, -1.0, 1.0);
+        hQvec[idet] = new TH2D(Form("hQvec_%s", detName[idet].Data()), Form("hQvec_%s", detName[idet].Data()), 400, -0.02, 0.02, 400, -0.02, 0.02);
     }
 }
 
