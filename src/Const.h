@@ -1,6 +1,18 @@
 #ifndef CONST_H
 #define CONST_H
 
+// Parameters to add dead channels to FT0, default no dead channels
+const int ndeadch = 1;
+const int deadch[ndeadch] = {-1}; // no dead channels
+//const int deadch[ndeadch] = { // 20 dead channels
+//    47,29,149,156,70,182,52,89,139,84,50,112,150,191,112,63,206,108,157,176};
+//const int deadch[ndeadch] = { // 100 dead channels
+//    140,52,173,139,13,78,28,132,125,17,89,154,88,132,36,11,14,133,173,152,38,6,
+//    115,79,156,104,20,150,121,53,110,124,172,206,60,189,204,136,10,30,23,66,66,
+//    114,52,24,172,207,79,132,179,124,200,62,50,145,207,86,126,64,108,1,22,123,
+//    52,131,159,122,67,141,69,176,55,83,117,30,206,138,52,111,82,106,28,190,90,
+//    111,72,76,0,98,97,15,113,83,69,199,67,196,32,164};
+
 const int nchft0a = 96;
 const int nchft0c = 112;
 

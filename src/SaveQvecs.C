@@ -79,8 +79,8 @@ void LoadCorrections(TString cent)
     for (int idet=0; idet<ndet; idet++) {
         corrInFile.open(Form("corrections/corr_%s_%s.txt", detName[idet].Data(), cent.Data()));
         if (corrInFile.fail()) {
-            std::cout << Form("corrections/corr_%s_%s.txt", detName[idet].Data(), cent.Data()) 
-                      << " could not be found, not loading corrections" << std::endl; 
+            std::cout << Form("corrections/corr_%s_%s.txt", detName[idet].Data(), cent.Data())
+                      << " could not be found, not loading corrections" << std::endl;
             continue;
         }
         std::string line;
@@ -211,7 +211,7 @@ int FillQvecFV0(UInt_t ient, int bcbegin)
                     const auto &chd = fv0ChData[chEnt++];
                     charge = (unsigned short)chd.chargeAdc;
                     channel = chd.pmtNumber;
-                    //cout << "\tchannel " << channel << "   charge : " << charge << endl; 
+                    //cout << "\tchannel " << channel << "   charge : " << charge << endl;
                 }
             }
             qvecFV0[0] = Qvec.Re();
@@ -255,6 +255,7 @@ int FillQvecFT0(UInt_t ient, int bcbegin)
             const auto &chd = ft0ChData[chEnt++];
             charge = chd.QTCAmpl;
             channel = chd.ChId;
+            if (IsDeadChannel(channel)) continue;
             if (channel < 96) {
                 SumQvec(QvecFT0A, charge, channel, "FT0A");
                 signalSumFT0A += charge;
@@ -320,8 +321,8 @@ double GetFV0Phi(int chno)
         iring = chno/8;
     }
     if (iring < 0) std::cout << "Ring not found!" << std::endl;
-    double x = fv0ringMidPoint[iring]*TMath::Cos(phi); 
-    double y = fv0ringMidPoint[iring]*TMath::Sin(phi); 
+    double x = fv0ringMidPoint[iring]*TMath::Cos(phi);
+    double y = fv0ringMidPoint[iring]*TMath::Sin(phi);
     //return TMath::ATan2(y+asideOffsetX, x+asideOffsetY);
     return phi;
 }
@@ -367,4 +368,11 @@ bool GoodEvent()
     if (TMath::Abs(qvecFT0A[0])>100. || TMath::Abs(qvecFT0A[1])>100.) return false;
     if (TMath::Abs(qvecFT0C[0])>100. || TMath::Abs(qvecFT0C[1])>100.) return false;
     return true;
+}
+
+bool IsDeadChannel(int ich)
+{
+    for (int i = 0; i < ndeadch; i++)
+        if (i==ich) return true;
+    return false;
 }

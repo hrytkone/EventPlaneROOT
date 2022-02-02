@@ -58,3 +58,4 @@ double GetFT0APhi(int chno);
 double GetFT0CPhi(int chno);
 double GetEffFromHisto(TH1D* h, double pt);
 bool GoodEvent();
+bool IsDeadChannel(int ich);
