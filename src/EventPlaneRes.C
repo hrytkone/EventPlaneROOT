@@ -2,6 +2,8 @@
 
 void EventPlaneRes(TString infile, TString outfile)
 {
+    gROOT->ProcessLine("#include <vector>");
+
     int isOpen = LoadInput(infile);
     if (!isOpen) return;
     InitOutput(outfile);
@@ -50,7 +52,7 @@ void InitOutput(TString outfile)
         hEPA[idet] = new TH1D(Form("hEPA_%s", detName[idet].Data()), Form("hEPA_%s", detName[idet].Data()), 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
         hRAB[idet] = new TH1D(Form("hRAB_%s", detName[idet].Data()), Form("hRAB_%s", detName[idet].Data()), 400, -1.0, 1.0);
         hRAC[idet] = new TH1D(Form("hRAC_%s", detName[idet].Data()), Form("hRAC_%s", detName[idet].Data()), 400, -1.0, 1.0);
-        hVnObs[idet] = new TH1D(Form("hVnObs_%s", detName[idet].Data()), Form("hVnObs_%s", detName[idet].Data()), 400, -1.0, 1.0);
+        hVnObs[idet] = new TH1D(Form("hVnObs_%s", detName[idet].Data()), Form("hVnObs_%s", detName[idet].Data()), 400, -2.0, 2.0);
         hQvec[idet] = new TH2D(Form("hQvec_%s", detName[idet].Data()), Form("hQvec_%s", detName[idet].Data()), 400, -0.02, 0.02, 400, -0.02, 0.02);
     }
 }
@@ -62,10 +64,12 @@ float GetEventPlane(float qx, float qy)
 
 float GetVnObs(float ep, int n)
 {
-    int ntrack = phi.size();
+    int ntrack = tpcPhi->size();
     float vn = 0.;
-    for (int itrack=0; itrack<ntrack; itrack++)
-        vn += TMath::Cos(n*(tpcPhi[itrack] - ep));
+    for (int itrack=0; itrack<ntrack; itrack++) {
+        cout << tpcPhi->at(itrack) << endl;
+        vn += TMath::Cos(n*(tpcPhi->at(itrack) - ep));
+    }
     return vn/ntrack;
 }
 

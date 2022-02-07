@@ -1,6 +1,12 @@
+#include <vector>
+
 #include "SaveQvecs.h"
 #include "Corrections.h"
 #include "Const.h"
+
+#ifdef __MAKECINT__
+#pragma link C++ class vector<float>+;
+#endif
 
 void SaveQvecs(TString kinefile="", TString fv0digitfile="", TString ft0digitfile="",
                 TString outfile="output.root", TString cent="20-30", TString docorr="1")
@@ -37,7 +43,7 @@ void InitOutput(TString outfile)
         outTree->Branch("qvecFT0C", &qvecFT0C, Form("qvecFT0C[%d]/F", nq));
         outTree->Branch("qvecB", &qvecB, Form("QvecB[%d]/F", nq));
         outTree->Branch("qvecC", &qvecC, Form("QvecC[%d]/F", nq));
-        outTree->Branch("tpcPhi", &tpcPhi, Form("tpcPhi[%d]/F", nq));
+        outTree->Branch("tpcPhi", &tpcPhi);
     }
 }
 
@@ -153,6 +159,7 @@ void FillQvecBC(UInt_t ient)
 
         if ( eta>-0.8 && eta<0.8 ) {
             tpcPhi.push_back(phi);
+            if (ient==0) cout << phi << endl;
         }
 
         if ( eta>-0.8 && eta<-0.1 ) {

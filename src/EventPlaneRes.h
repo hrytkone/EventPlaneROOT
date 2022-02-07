@@ -10,7 +10,7 @@ float epB, epC;
 float qvecA[ndet][nq];
 float qvecB[nq];
 float qvecC[nq];
-std::vector<float> tpcPhi;
+std::vector<float> *tpcPhi = 0;
 
 // Resolution components
 TH1D *hRAB[ndet];
