@@ -10,6 +10,7 @@ float epB, epC;
 float qvecA[ndet][nq];
 float qvecB[nq];
 float qvecC[nq];
+std::vector<float> tpcPhi;
 
 // Resolution components
 TH1D *hRAB[ndet];
@@ -21,10 +22,14 @@ TH1D *hEPA[ndet];
 TH1D *hEPB;
 TH1D *hEPC;
 
+// vnobs
+TH1D *hVnObs[ndet];
+
 // To check Q-vec dist
 TH2D *hQvec[ndet];
 
 int LoadInput(TString infile);
 void InitOutput(TString outfile);
 float GetEventPlane(float qx, float qy);
+float GetVnObs(float ep, int n);
 void FillHistos();

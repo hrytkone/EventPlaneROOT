@@ -23,6 +23,7 @@ float qvecFT0A[nq];
 float qvecFT0C[nq];
 float qvecB[nq];
 float qvecC[nq];
+std::vector<float> tpcPhi;
 
 TFile *finKine;
 TFile *finFV0Digit;

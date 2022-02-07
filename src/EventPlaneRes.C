@@ -17,7 +17,6 @@ void EventPlaneRes(TString infile, TString outfile)
             hQvec[idet]->Fill(qvecA[idet][0], qvecA[idet][1]);
             epA[idet] = GetEventPlane(qvecA[idet][0], qvecA[idet][1]);
         }
-
         FillHistos();
     }
     fout->Write("", TObject::kOverwrite);
@@ -36,6 +35,7 @@ int LoadInput(TString infile)
         inTree->SetBranchAddress(Form("qvec%s",detName[idet].Data()), &qvecA[idet]);
     inTree->SetBranchAddress("qvecB", &qvecB);
     inTree->SetBranchAddress("qvecC", &qvecC);
+    inTree->SetBranchAddress("tpcPhi", &tpcPhi);
 
     return 1;
 }
@@ -50,6 +50,7 @@ void InitOutput(TString outfile)
         hEPA[idet] = new TH1D(Form("hEPA_%s", detName[idet].Data()), Form("hEPA_%s", detName[idet].Data()), 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
         hRAB[idet] = new TH1D(Form("hRAB_%s", detName[idet].Data()), Form("hRAB_%s", detName[idet].Data()), 400, -1.0, 1.0);
         hRAC[idet] = new TH1D(Form("hRAC_%s", detName[idet].Data()), Form("hRAC_%s", detName[idet].Data()), 400, -1.0, 1.0);
+        hVnObs[idet] = new TH1D(Form("hVnObs_%s", detName[idet].Data()), Form("hVnObs_%s", detName[idet].Data()), 400, -1.0, 1.0);
         hQvec[idet] = new TH2D(Form("hQvec_%s", detName[idet].Data()), Form("hQvec_%s", detName[idet].Data()), 400, -0.02, 0.02, 400, -0.02, 0.02);
     }
 }
@@ -59,12 +60,24 @@ float GetEventPlane(float qx, float qy)
     return TMath::ATan2(qy, qx)/2.0;
 }
 
+float GetVnObs(float ep, int n)
+{
+    int ntrack = phi.size();
+    float vn = 0.;
+    for (int itrack=0; itrack<ntrack; itrack++)
+        vn += TMath::Cos(n*(tpcPhi[itrack] - ep));
+    return vn/ntrack;
+}
+
 void FillHistos()
 {
     for (int idet=0; idet<ndet; idet++) {
         hEPA[idet]->Fill(epA[idet]);
         hRAB[idet]->Fill(TMath::Cos(2*(epA[idet] - epB)));
         hRAC[idet]->Fill(TMath::Cos(2*(epA[idet] - epC)));
+
+        // Calculate & save v2obs for validating the correction with EP res
+        hVnObs[idet]->Fill(epA[idet], 2.);
     }
     hRBC->Fill(TMath::Cos(2*(epB - epC)));
     hEPB->Fill(epB);

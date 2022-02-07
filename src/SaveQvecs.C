@@ -28,6 +28,7 @@ void InitOutput(TString outfile)
         outTree->SetBranchAddress("qvecFT0C", &qvecFT0C);
         outTree->SetBranchAddress("qvecB", &qvecB);
         outTree->SetBranchAddress("qvecC", &qvecC);
+        outTree->SetBranchAddress("tpcPhi", &tpcPhi);
     } else {
     	fout = TFile::Open(outfile.Data(), "RECREATE");
         outTree = new TTree("Qvecs", "Q-vectors for FIT detectors");
@@ -36,6 +37,7 @@ void InitOutput(TString outfile)
         outTree->Branch("qvecFT0C", &qvecFT0C, Form("qvecFT0C[%d]/F", nq));
         outTree->Branch("qvecB", &qvecB, Form("QvecB[%d]/F", nq));
         outTree->Branch("qvecC", &qvecC, Form("QvecC[%d]/F", nq));
+        outTree->Branch("tpcPhi", &tpcPhi, Form("tpcPhi[%d]/F", nq));
     }
 }
 
@@ -127,6 +129,7 @@ void FillQvectors()
             DoCorrections(qvecFT0C[0], qvecFT0C[1], corr[2]);
         }
         outTree->Fill();
+        tpcPhi.clear();
     }
 }
 
@@ -147,6 +150,10 @@ void FillQvecBC(UInt_t ient)
 
         double eta = t.GetEta();
         double phi = TMath::ATan2(t.Py(), t.Px());
+
+        if ( eta>-0.8 && eta<0.8 ) {
+            tpcPhi.push_back(phi);
+        }
 
         if ( eta>-0.8 && eta<-0.1 ) {
             QvecB += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
