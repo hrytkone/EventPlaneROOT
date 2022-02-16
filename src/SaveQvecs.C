@@ -32,6 +32,7 @@ void InitOutput(TString outfile)
         outTree->SetBranchAddress("qvecFV0", &qvecFV0);
         outTree->SetBranchAddress("qvecFT0A", &qvecFT0A);
         outTree->SetBranchAddress("qvecFT0C", &qvecFT0C);
+        outTree->SetBranchAddress("qvecFull", &qvecFull);
         outTree->SetBranchAddress("qvecB", &qvecB);
         outTree->SetBranchAddress("qvecC", &qvecC);
         outTree->SetBranchAddress("tpcPhi", &tpcPhi);
@@ -43,6 +44,7 @@ void InitOutput(TString outfile)
         outTree->Branch("qvecFT0C", &qvecFT0C, Form("qvecFT0C[%d]/F", nq));
         outTree->Branch("qvecB", &qvecB, Form("QvecB[%d]/F", nq));
         outTree->Branch("qvecC", &qvecC, Form("QvecC[%d]/F", nq));
+        outTree->Branch("qvecFull", &qvecC, Form("QvecFull[%d]/F", nq));
         outTree->Branch("tpcPhi", &tpcPhi);
     }
 }
@@ -143,7 +145,7 @@ void FillQvecBC(UInt_t ient)
 {
     fKineTree->GetEntry(ient);
 
-    TComplex QvecB(0), QvecC(0);
+    TComplex QvecB(0), QvecC(0), QvecFull(0);
     int nTracksB = 0, nTracksC = 0;
     for (auto &t : *mctrack) {
 
@@ -162,23 +164,31 @@ void FillQvecBC(UInt_t ient)
             tpcPhi->push_back(phi);
         }
 
-        if ( eta>-0.8 && eta<-0.1 ) {
+        //if ( eta>-0.8 && eta<-0.1 ) {
+        if ( eta>-4. && eta<-1. ) {
             QvecB += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
+            QvecFull += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
             nTracksB++;
         }
 
-        if ( eta>0.1 && eta<0.8 ) {
+        //if ( eta>0.1 && eta<0.8 ) {
+        if ( eta>1. && eta<4. ) {
             QvecC += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
+            QvecFull += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
             nTracksC++;
         }
+
     }
 
     QvecB /= (double)nTracksB;
     QvecC /= (double)nTracksC;
+    QvecFull /= (double)(nTracksB+nTracksC);
     qvecB[0] = QvecB.Re();
     qvecB[1] = QvecB.Im();
     qvecC[0] = QvecC.Re();
     qvecC[1] = QvecC.Im();
+    qvecFull[0] = QvecFull.Re();
+    qvecFull[1] = QvecFull.Im();
 }
 
 int FillQvecFV0(UInt_t ient, int bcbegin)
