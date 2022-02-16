@@ -15,6 +15,15 @@ void EventPlaneRes(TString infile, TString outfile)
 
         epB = GetEventPlane(qvecB[0], qvecB[1]);
         epC = GetEventPlane(qvecC[0], qvecC[1]);
+        
+        bool bKeepEvent = 1;
+        for (int idet=0; idet<ndet; idet++) {
+            if (TMath::Abs(qvecA[idet][0])>5. || TMath::Abs(qvecA[idet][1])>5.)
+                bKeepEvent = 0;
+        }
+
+        if (!bKeepEvent) continue;
+
         for (int idet=0; idet<ndet; idet++) {
             hQvec[idet]->Fill(qvecA[idet][0], qvecA[idet][1]);
             epA[idet] = GetEventPlane(qvecA[idet][0], qvecA[idet][1]);
@@ -52,7 +61,7 @@ void InitOutput(TString outfile)
         hEPA[idet] = new TH1D(Form("hEPA_%s", detName[idet].Data()), Form("hEPA_%s", detName[idet].Data()), 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
         hRAB[idet] = new TH1D(Form("hRAB_%s", detName[idet].Data()), Form("hRAB_%s", detName[idet].Data()), 400, -1.0, 1.0);
         hRAC[idet] = new TH1D(Form("hRAC_%s", detName[idet].Data()), Form("hRAC_%s", detName[idet].Data()), 400, -1.0, 1.0);
-        hVnObs[idet] = new TH1D(Form("hVnObs_%s", detName[idet].Data()), Form("hVnObs_%s", detName[idet].Data()), 400, -2.0, 2.0);
+        hVnObs[idet] = new TH1D(Form("hVnObs_%s", detName[idet].Data()), Form("hVnObs_%s", detName[idet].Data()), 400, -1.0, 1.0);
         hQvec[idet] = new TH2D(Form("hQvec_%s", detName[idet].Data()), Form("hQvec_%s", detName[idet].Data()), 400, -0.02, 0.02, 400, -0.02, 0.02);
     }
 }
@@ -67,7 +76,6 @@ float GetVnObs(float ep, int n)
     int ntrack = tpcPhi->size();
     float vn = 0.;
     for (int itrack=0; itrack<ntrack; itrack++) {
-        cout << tpcPhi->at(itrack) << endl;
         vn += TMath::Cos(n*(tpcPhi->at(itrack) - ep));
     }
     return vn/ntrack;
@@ -81,7 +89,7 @@ void FillHistos()
         hRAC[idet]->Fill(TMath::Cos(2*(epA[idet] - epC)));
 
         // Calculate & save v2obs for validating the correction with EP res
-        hVnObs[idet]->Fill(epA[idet], 2.);
+        hVnObs[idet]->Fill(GetVnObs(epA[idet], 2.));
     }
     hRBC->Fill(TMath::Cos(2*(epB - epC)));
     hEPB->Fill(epB);

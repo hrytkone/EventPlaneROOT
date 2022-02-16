@@ -135,7 +135,7 @@ void FillQvectors()
             DoCorrections(qvecFT0C[0], qvecFT0C[1], corr[2]);
         }
         outTree->Fill();
-        tpcPhi.clear();
+        tpcPhi->clear();
     }
 }
 
@@ -151,6 +151,7 @@ void FillQvecBC(UInt_t ient)
         if (bUseTPCeff && gRandom->Uniform(1.) > GetEffFromHisto(hCoeff, t.GetPt())) continue;
 
         Int_t pid = t.GetPdgCode();
+        if (TDatabasePDG::Instance()->GetParticle(pid)==NULL) continue;
         Double_t charge = TDatabasePDG::Instance()->GetParticle(pid)->Charge();
         if (charge==0.0) continue;
 
@@ -158,8 +159,7 @@ void FillQvecBC(UInt_t ient)
         double phi = TMath::ATan2(t.Py(), t.Px());
 
         if ( eta>-0.8 && eta<0.8 ) {
-            tpcPhi.push_back(phi);
-            if (ient==0) cout << phi << endl;
+            tpcPhi->push_back(phi);
         }
 
         if ( eta>-0.8 && eta<-0.1 ) {
@@ -218,7 +218,7 @@ int FillQvecFV0(UInt_t ient, int bcbegin)
 
         chEnt = bcd.ref.getFirstEntry();
         if (signalSum != 0) {
-            Qvec /= TMath::Sqrt(signalSum);
+            Qvec /= signalSum;
             if (qvecFV0[0]==qvecFV0[1]) {
                 //cout << "Qvec : " << qvecFV0[0] << " " << qvecFV0[1] << endl;
                 for (int ich = 0; ich < bcd.ref.getEntries(); ich++) { // Go through FV0 channels
@@ -280,7 +280,7 @@ int FillQvecFT0(UInt_t ient, int bcbegin)
         }
 
         if (signalSumFT0A != 0) {
-            QvecFT0A /= TMath::Sqrt(signalSumFT0A);
+            QvecFT0A /= signalSumFT0A;
             qvecFT0A[0] = QvecFT0A.Re();
             qvecFT0A[1] = QvecFT0A.Im();
         } else {
@@ -289,7 +289,7 @@ int FillQvecFT0(UInt_t ient, int bcbegin)
         }
 
         if (signalSumFT0C != 0) {
-            QvecFT0C /= TMath::Sqrt(signalSumFT0C);
+            QvecFT0C /= signalSumFT0C;
             qvecFT0C[0] = QvecFT0C.Re();
             qvecFT0C[1] = QvecFT0C.Im();
         } else {
@@ -337,8 +337,8 @@ double GetFV0Phi(int chno)
     if (iring < 0) std::cout << "Ring not found!" << std::endl;
     double x = fv0ringMidPoint[iring]*TMath::Cos(phi);
     double y = fv0ringMidPoint[iring]*TMath::Sin(phi);
-    //return TMath::ATan2(y+asideOffsetX, x+asideOffsetY);
-    return phi;
+    return TMath::ATan2(y+asideOffsetX, x+asideOffsetY);
+    //return phi;
 }
 
 double GetFT0APhi(int chno)

@@ -36,6 +36,10 @@ nfiles=${#kinefiles[@]}
 
 for (( i=0; i<$nfiles; i++ ))
 do
+    if [[ "$i" == "19" || "$i" == "20" || "$i" == "22" || "$i" == "34" ]]; then
+        echo "Skip run ${ft0digitfiles["${i}"]}"
+        continue
+    fi
 	cmd="root -b -q 'src/SaveQvecs.C(\"${kinefiles[i]}\", \"${fv0digitfiles[i]}\", \"${ft0digitfiles[i]}\", \"${outfile}\", \"${comment}\", \"${docorr}\")'"
 	eval $cmd
 done

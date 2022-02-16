@@ -4,10 +4,10 @@ const int nq = 2;
 const int ndet = 3;
 const int ncorr = 8;
 const TString detName[ndet] = {"FV0", "FT0A", "FT0C"};
-//const float asideOffsetX = 0.314;
-const float asideOffsetX = 0.;
-//const float asideOffsetY = 0.718;
-const float asideOffsetY = 0.;
+const float asideOffsetX = 0.314;
+//const float asideOffsetX = 0.;
+const float asideOffsetY = 0.718;
+//const float asideOffsetY = 0.;
 
 bool bDoCorrections = true;
 bool bUseTPCeff = true;
@@ -23,7 +23,7 @@ float qvecFT0A[nq];
 float qvecFT0C[nq];
 float qvecB[nq];
 float qvecC[nq];
-std::vector<float> tpcPhi;
+std::vector<float> * tpcPhi = 0;
 
 TFile *finKine;
 TFile *finFV0Digit;
