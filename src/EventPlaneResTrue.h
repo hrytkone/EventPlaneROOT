@@ -6,7 +6,7 @@ const int nq = 2;
 TFile *fin, *fout;
 TTree *inTree;
 
-float epB, epC;
+float epB, epC, epFull;
 float qvecB[nq];
 float qvecC[nq];
 float qvecFull[nq];

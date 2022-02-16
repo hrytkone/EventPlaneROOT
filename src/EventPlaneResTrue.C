@@ -46,7 +46,7 @@ void InitOutput(TString outfile)
     hEPC    = new TH1D("hEPC", "hEPC", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
     hEPFull = new TH1D("hEPFull", "hEPFull", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
     hRsub   = new TH1D("hRsub", "hRsub", 400, -1.0, 1.0);
-    hVnObs  = new TH1D(Form("hVnObs_%s", detName[idet].Data()), Form("hVnObs_%s", detName[idet].Data()), 400, -1.0, 1.0);
+    hVnObs  = new TH1D("hVnObs", "hVnObs", 400, -1.0, 1.0);
 }
 
 float GetEventPlane(float qx, float qy)
