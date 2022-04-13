@@ -1,23 +1,26 @@
 const int ncent = 8;
-const int ndet = 3;
+const int ndet = 4; // 4th = true
 
 TString colsys = "Pb#font[122]{-}Pb";
 TString energy = "5.5 TeV";
 
 float cent[ncent+1] = {0., 5., 10., 20., 30., 40., 50., 60., 80.};
-TString dir = "data-v2_2022-02-09/res_qvecs-corr";
+TString dir     = "data-v2_2022-02-09/res_qvecs-corr";
+TString dirtrue = "data-true-res_2022-02-23/res_qvecs-corr";
 TString files[ncent] = {"cent00-05.root", "cent05-10.root", "cent10-20.root",
                         "cent20-30.root", "cent30-40.root", "cent40-50.root",
                         "cent50-60.root", "cent60-80.root"};
-TString detname[ndet] = {"FT0C", "FV0", "FT0A"};
-TString legentry[ndet] = {"FT0-C", "FV0", "FT0-A"};
-EColor mColor[ndet] = {kRed, kBlue, kBlack};
+TString detname[ndet] = {"FT0C", "FV0", "FT0A", "True"};
+TString legentry[ndet] = {"FT0-C", "FV0", "FT0-A", "True"};
+EColor mColor[ndet] = {kRed, kBlue, kBlack, kBlack};
 
 TFile *fin[ncent];
+TFile *fintrue[ncent];
 TH1D *hVnObs[ncent][ndet];
 TH1D *hRAB[ncent][ndet];
 TH1D *hRAC[ncent][ndet];
 TH1D *hRBC[ncent];
+TH1D *hRsub[ncent];
 TGraphErrors *gV2[ndet];
 TLegend *leg;
 TCanvas *c1;
@@ -31,6 +34,10 @@ void LoadData();
 void SetStyle(Bool_t graypalette);
 void GetResAndErr(int icent, int idet);
 void GetV2AndErr(int icent, int idet);
+double R1(double khi);
+double func(double *x, double *p);
+double RIter(double x0, double R0, double err);
+double CalculateRerror(double khi, double khiErr);
 void ConfigPlots();
 void PlotToCanvas();
 
@@ -40,6 +47,7 @@ void PlotV2()
     LoadData();
 
     for (int idet=0; idet<ndet; idet++) {
+        cout << legentry[idet] << " : " << endl;
         gV2[idet] = new TGraphErrors();
         for (int icent=0; icent<ncent; icent++) {
             GetResAndErr(icent, idet);
@@ -60,11 +68,16 @@ void LoadData()
         fin[icent] = TFile::Open(Form("%s/%s", dir.Data(), files[icent].Data()));
 
         hRBC[icent] = (TH1D*)fin[icent]->Get("hRBC");
-        for (int idet=0; idet<ndet; idet++) {
-            hRAB[icent][idet] = (TH1D*)fin[icent]->Get(Form("hRAB_%s", detname[idet].Data()));
-            hRAC[icent][idet] = (TH1D*)fin[icent]->Get(Form("hRAC_%s", detname[idet].Data()));
+        for (int idet=0; idet<ndet-1; idet++) {
+            hRAB[icent][idet]   = (TH1D*)fin[icent]->Get(Form("hRAB_%s", detname[idet].Data()));
+            hRAC[icent][idet]   = (TH1D*)fin[icent]->Get(Form("hRAC_%s", detname[idet].Data()));
             hVnObs[icent][idet] = (TH1D*)fin[icent]->Get(Form("hVnObs_%s", detname[idet].Data()));
         }
+
+        // Get "true" values
+        fintrue[icent]    = TFile::Open(Form("%s/%s", dirtrue.Data(), files[icent].Data()));
+        hRsub[icent]      = (TH1D*)fintrue[icent]->Get("hRsub");
+        hVnObs[icent][ndet-1] = (TH1D*)fintrue[icent]->Get("hVnObs");
     }
 }
 
@@ -112,16 +125,29 @@ void SetStyle(Bool_t graypalette)
 
 void GetResAndErr(int icent, int idet)
 {
-    float rab = hRAB[icent][idet]->GetMean();
-    float rac = hRAC[icent][idet]->GetMean();
-    float rbc = hRBC[icent]->GetMean();
-    float rabErr = hRAB[icent][idet]->GetMeanError();
-    float racErr = hRAC[icent][idet]->GetMeanError();
-    float rbcErr = hRBC[icent]->GetMeanError();
+    if (idet < ndet-1) {
+        float rab = hRAB[icent][idet]->GetMean();
+        float rac = hRAC[icent][idet]->GetMean();
+        float rbc = hRBC[icent]->GetMean();
+        float rabErr = hRAB[icent][idet]->GetMeanError();
+        float racErr = hRAC[icent][idet]->GetMeanError();
+        float rbcErr = hRBC[icent]->GetMeanError();
 
-    res[idet][icent] = TMath::Sqrt((rab * rac)/rbc);
-    resErr[idet][icent] = 0.5*res[idet][icent]*TMath::Sqrt(TMath::Power(rabErr/rab, 2) + TMath::Power(racErr/rac, 2) + TMath::Power(rbcErr/rbc, 2));
+        res[idet][icent] = TMath::Sqrt((rab * rac)/rbc);
+        resErr[idet][icent] = 0.5*res[idet][icent]*TMath::Sqrt(TMath::Power(rabErr/rab, 2) + TMath::Power(racErr/rac, 2) + TMath::Power(rbcErr/rbc, 2));
+    } else {
+        double khi0 = 0.5;
+        double err = 0.0001;
 
+        //res[idet][icent] = TMath::Sqrt(hRsub[icent]->GetMean());
+        double res0 = TMath::Sqrt(hRsub[icent]->GetMean());
+        double khi = RIter(khi0, res0, err);
+        cout << "\tKhi : " << khi << endl;
+        res[idet][icent] = R1(TMath::Sqrt(2)*khi);
+
+        //resErr[idet][icent] = hRsub[icent]->GetMeanError()/(2.*TMath::Sqrt(hRsub[icent]->GetMean()));
+        resErr[idet][icent] = CalculateRerror(khi, err);
+    }
     cout << "\tRes : " << res[idet][icent] << " +- " << resErr[idet][icent] << endl;
 }
 
@@ -131,8 +157,38 @@ void GetV2AndErr(int icent, int idet)
     float vnObsErr = hVnObs[icent][idet]->GetMeanError();
 
     v2[idet][icent] = vnObs/res[idet][icent];
+    //v2[idet][icent] = vnObs/(TMath::Sqrt(2.)*res[idet][icent]);
     v2Err[idet][icent] = v2[idet][icent]*TMath::Sqrt((resErr[idet][icent]/res[idet][icent])*(resErr[idet][icent]/res[idet][icent])
                         + (vnObsErr/vnObs)*(vnObsErr/vnObs));
+}
+
+double R1(double khi) {
+    return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*(TMath::BesselI0(khi*khi/2) + TMath::BesselI1(khi*khi/2));
+}
+
+double func(double *x, double *p) {
+    double khi = x[0];
+    double Rk = p[0];
+    return (TMath::Sqrt(TMath::Pi())/2)*khi*TMath::Exp(-khi*khi/2)*(TMath::BesselI0(khi*khi/2) + TMath::BesselI1(khi*khi/2)) - Rk;
+}
+
+double RIter(double x0, double R0, double err) {
+    double x = 0;
+    TF1 *fRes = new TF1("fRes", func, 0, 50.0, 1);
+    fRes->SetParameter(0, R0);
+    while (TMath::Abs(R1(x) - R0) > err) {
+        x = x0 - fRes->Eval(x0)/fRes->Derivative(x0);
+        x0 = x;
+    }
+    return x;
+}
+
+// Virheen yleisellä etenemisellä R(khi):n lausekkeesta
+double CalculateRerror(double khi, double khiErr) {
+    double bessel0 = -(khi*khi-2)*TMath::BesselI0(khi*khi/2);
+    double bessel1 = 2*TMath::BesselI1(khi*khi/2);
+    double bessel2 = khi*khi*TMath::BesselI(2,khi*khi/2);
+    return TMath::Sqrt(TMath::Pi()/4)*TMath::Exp(-khi*khi)*(bessel0 + bessel1 + bessel2)*khiErr;
 }
 
 void ConfigPlots()
@@ -146,12 +202,15 @@ void ConfigPlots()
         gV2[idet]->GetXaxis()->SetLabelSize(0.035);
         gV2[idet]->GetXaxis()->SetTitleSize(0.04);
         gV2[idet]->GetXaxis()->SetLimits(0., 80.);
-        gV2[idet]->GetYaxis()->SetMaxDigits(1);
+        gV2[idet]->GetYaxis()->SetMaxDigits(4);
         gV2[idet]->GetYaxis()->SetLabelSize(0.035);
         gV2[idet]->GetYaxis()->SetTitleSize(0.04);
         //gV2[idet]->GetYaxis()->SetRangeUser(0., 1.);
         gV2[idet]->SetMarkerColor(mColor[idet]);
-        gV2[idet]->SetMarkerStyle(20);
+        if (idet < ndet-1)
+            gV2[idet]->SetMarkerStyle(20);
+        else
+            gV2[idet]->SetMarkerStyle(kCircle);
     }
 }
 
