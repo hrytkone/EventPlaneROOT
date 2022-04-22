@@ -8,7 +8,9 @@ TString energy = "5.5 TeV";
 float cent[ncent+1] = {0., 5., 10., 20., 30., 40., 50., 60., 80.};
 //float cent[ncent+1] = {20., 30.};
 //TString files[ncent] = {"../res_cent20-30_tpc-eff_corr.root"};
-TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-03-10_deadch-20/res_qvecs-corr", "2022-03-10_deadch-50/res_qvecs-corr", "2022-03-10_deadch-100/res_qvecs-corr"};
+//TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-03-10_deadch-20/res_qvecs-corr", "2022-03-10_deadch-50/res_qvecs-corr", "2022-03-10_deadch-100/res_qvecs-corr"};
+TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-04-19_deadch-10percent/res_qvecs-corr", "2022-04-19_deadch-25percent/res_qvecs-corr", "2022-04-19_deadch-50percent/res_qvecs-corr"};
+
 TString files[ncent] = {"cent00-05.root", "cent05-10.root", "cent10-20.root",
                         "cent20-30.root", "cent30-40.root", "cent40-50.root",
                         "cent50-60.root", "cent60-80.root"};
@@ -166,7 +168,7 @@ void ConfigPlots()
             gV2[iset][idet]->GetYaxis()->SetTitleSize(0.04);
             //gV2[iset][idet]->GetYaxis()->SetRangeUser(0., 1.);
             gV2[iset][idet]->SetMarkerColor(mColor[iset]);
-            gV2[iset][idet]->SetMarkerStyle(kCircle);
+            gV2[iset][idet]->SetMarkerStyle(kOpenCircle);
         }
     }
 }
