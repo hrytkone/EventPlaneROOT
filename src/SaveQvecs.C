@@ -164,15 +164,15 @@ void FillQvecBC(UInt_t ient)
             tpcPhi->push_back(phi);
         }
 
-        //if ( eta>-0.8 && eta<-0.1 ) {
-        if ( eta>-4. && eta<-1. ) {
+        if ( eta>-0.8 && eta<-0.1 ) {
+        //if ( eta>-4. && eta<-1. ) {
             QvecB += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
             QvecFull += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
             nTracksB++;
         }
 
-        //if ( eta>0.1 && eta<0.8 ) {
-        if ( eta>1. && eta<4. ) {
+        if ( eta>0.1 && eta<0.8 ) {
+        //if ( eta>1. && eta<4. ) {
             QvecC += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
             QvecFull += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
             nTracksC++;
@@ -397,6 +397,6 @@ bool GoodEvent()
 bool IsDeadChannel(int ich)
 {
     for (int i = 0; i < ndeadch; i++)
-        if (i==ich) return true;
+        if (deadch[i]==ich) return true;
     return false;
 }
