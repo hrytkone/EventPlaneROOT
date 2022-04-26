@@ -21,6 +21,7 @@ float corr[ndet][ncorr];
 float qvecFV0[nq];
 float qvecFT0A[nq];
 float qvecFT0C[nq];
+float qvecA[nq];
 float qvecB[nq];
 float qvecC[nq];
 float qvecFull[nq];
@@ -52,6 +53,7 @@ void CloseFiles();
 
 void FillQvectors();
 void FillQvecBC(UInt_t ient);
+void FillQvecA(UInt_t ient);
 int FillQvecFV0(UInt_t ient, int bcbegin);
 int FillQvecFT0(UInt_t ient, int bcbegin);
 void SumQvec(TComplex &Qvec, double nch, int chno, TString det);

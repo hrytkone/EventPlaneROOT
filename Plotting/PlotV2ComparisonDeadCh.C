@@ -1,6 +1,6 @@
 const int ncent = 8;
 const int ndet = 2;
-const int nset = 4;
+const int nset = 5;
 
 TString colsys = "Pb#font[122]{-}Pb";
 TString energy = "5.5 TeV";
@@ -9,17 +9,18 @@ float cent[ncent+1] = {0., 5., 10., 20., 30., 40., 50., 60., 80.};
 //float cent[ncent+1] = {20., 30.};
 //TString files[ncent] = {"../res_cent20-30_tpc-eff_corr.root"};
 //TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-03-10_deadch-20/res_qvecs-corr", "2022-03-10_deadch-50/res_qvecs-corr", "2022-03-10_deadch-100/res_qvecs-corr"};
-TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-04-19_deadch-10percent/res_qvecs-corr", "2022-04-19_deadch-25percent/res_qvecs-corr", "2022-04-19_deadch-50percent/res_qvecs-corr"};
-
+TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-04-19_deadch-10percent/res_qvecs-corr",
+                    "2022-04-19_deadch-25percent/res_qvecs-corr", "2022-04-19_deadch-50percent/res_qvecs-corr",
+                    "2022-04-19_deadch-75percent/res_qvecs-corr"};
 TString files[ncent] = {"cent00-05.root", "cent05-10.root", "cent10-20.root",
                         "cent20-30.root", "cent30-40.root", "cent40-50.root",
                         "cent50-60.root", "cent60-80.root"};
 //TString files[ncent] = {"cent20-30.root"};
 TString detname[ndet] = {"FT0C", "FT0A"};
-TString legentry[nset] = {"no dead ch", "10 dead ch", "25 dead ch", "50 dead ch"};
-EColor mColor[nset] = {kBlack, kMagenta, kRed, kBlue};
+TString legentry[nset] = {"no dead ch", "10 % dead ch", "25 % dead ch", "50 % dead ch", "75 % dead ch"};
+EColor mColor[nset] = {kBlack, kMagenta, kRed, kBlue, kOrange};
 
-float offset[nset] = {-0.1,-0.3,0.1,0.3};
+float offset[nset] = {-.6,-0.2,0.2,0.6};
 
 TFile *fin[nset][ncent];
 TH1D *hVnObs[nset][ncent][ndet];
@@ -41,6 +42,7 @@ void GetResAndErr(int iset, int icent, int idet);
 void GetV2AndErr(int iset, int icent, int idet);
 void ConfigPlots();
 void PlotToCanvas();
+void RedrawBorder();
 
 void PlotV2ComparisonDeadCh()
 {
@@ -54,10 +56,13 @@ void PlotV2ComparisonDeadCh()
             for (int icent=0; icent<ncent; icent++) {
                 GetResAndErr(iset, icent, idet);
                 GetV2AndErr(iset, icent, idet);
-                //gV2[iset][idet]->SetPoint(icent, cent[icent] + (cent[icent+1]-cent[icent])/2., v2[iset][idet][icent]);
-                //gV2[iset][idet]->SetPointError(icent, (cent[icent+1]-cent[icent])/2., v2Err[iset][idet][icent]);
-                gV2[iset][idet]->SetPoint(icent, cent[icent] + (1.+offset[iset])*(cent[icent+1]-cent[icent])/2., v2[iset][idet][icent]);
-                gV2[iset][idet]->SetPointError(icent, 0., v2Err[iset][idet][icent]);
+                if (iset==0) {
+                    gV2[iset][idet]->SetPoint(icent, cent[icent] + (cent[icent+1]-cent[icent])/2., v2[iset][idet][icent]);
+                    gV2[iset][idet]->SetPointError(icent, (cent[icent+1]-cent[icent])/2., v2Err[iset][idet][icent]);
+                } else {
+                    gV2[iset][idet]->SetPoint(icent, cent[icent] + (1.+offset[iset])*(cent[icent+1]-cent[icent])/2., v2[iset][idet][icent]);
+                    gV2[iset][idet]->SetPointError(icent, 0., v2Err[iset][idet][icent]);
+                }
             }
         }
     }
@@ -158,7 +163,6 @@ void ConfigPlots()
         leg[idet]->SetFillStyle(0); leg[idet]->SetBorderSize(0); leg[idet]->SetTextSize(gStyle->GetTextSize()*0.65);
         leg[idet]->SetHeader(Form("%s #sqrt{#it{s}_{NN}} = %s", colsys.Data(), energy.Data()));
         for (int iset=0; iset<nset; iset++) {
-            leg[idet]->AddEntry(gV2[iset][idet], legentry[iset], "p");
             gV2[iset][idet]->SetTitle("; centrality (%); v_{2}");
             gV2[iset][idet]->GetXaxis()->SetLabelSize(0.035);
             gV2[iset][idet]->GetXaxis()->SetTitleSize(0.04);
@@ -168,7 +172,17 @@ void ConfigPlots()
             gV2[iset][idet]->GetYaxis()->SetTitleSize(0.04);
             //gV2[iset][idet]->GetYaxis()->SetRangeUser(0., 1.);
             gV2[iset][idet]->SetMarkerColor(mColor[iset]);
-            gV2[iset][idet]->SetMarkerStyle(kOpenCircle);
+            if (iset==0) {
+                leg[idet]->AddEntry(gV2[iset][idet], legentry[iset], "lef");
+                gV2[iset][idet]->SetMarkerColor(kBlue-8);
+                gV2[iset][idet]->SetMarkerStyle(kDot);
+                gV2[iset][idet]->SetLineColor(kBlue-8);
+            } else {
+                gV2[iset][idet]->SetMarkerStyle(53);
+                leg[idet]->AddEntry(gV2[iset][idet], legentry[iset], "p");
+            }
+            gV2[iset][idet]->SetFillColor(kBlue-10);
+            gV2[iset][idet]->SetFillStyle(1001);
         }
     }
 }
@@ -178,10 +192,12 @@ void PlotToCanvas()
     for (int idet=0; idet<ndet; idet++) {
         c1[idet] = new TCanvas(Form("c1_%d", idet), "c1", 800, 800);
         for (int iset=0; iset<nset; iset++) {
-            if (iset==0)
-                gV2[iset][idet]->Draw("AP");
-            else
+            if (iset==0) {
+                gV2[iset][idet]->Draw("A2");
+                gV2[iset][idet]->Draw("P");
+            } else {
                 gV2[iset][idet]->Draw("P SAME");
+            }
         }
         leg[idet]->Draw("SAME");
 
@@ -189,5 +205,15 @@ void PlotToCanvas()
         texsim->SetNDC();
         texsim->SetTextSize(gStyle->GetTextSize()*0.65);
         texsim->Draw();
+        RedrawBorder();
     }
+}
+
+void RedrawBorder()
+{
+   gPad->Update();
+   gPad->RedrawAxis();
+   TLine l;
+   l.DrawLine(gPad->GetUxmin(), gPad->GetUymax(), gPad->GetUxmax(), gPad->GetUymax());
+   l.DrawLine(gPad->GetUxmax(), gPad->GetUymin(), gPad->GetUxmax(), gPad->GetUymax());
 }

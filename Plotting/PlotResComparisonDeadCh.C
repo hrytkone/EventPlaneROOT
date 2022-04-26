@@ -1,6 +1,6 @@
 const int ncent = 8;
 const int ndet = 2;
-const int nset = 4;
+const int nset = 5;
 
 TString colsys = "Pb#font[122]{-}Pb";
 TString energy = "5.5 TeV";
@@ -8,14 +8,16 @@ TString energy = "5.5 TeV";
 float cent[ncent+1] = {0., 5., 10., 20., 30., 40., 50., 60., 80.};
 //float cent[ncent+1] = {20., 30.};
 //TString files[ncent] = {"../res_cent20-30_tpc-eff_corr.root"};
-TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-04-19_deadch-10percent/res_qvecs-corr", "2022-04-19_deadch-25percent/res_qvecs-corr", "2022-04-19_deadch-50percent/res_qvecs-corr"};
+TString dir[nset] = {"data-v2_2022-02-09/res_qvecs-corr", "2022-04-19_deadch-10percent/res_qvecs-corr",
+                    "2022-04-19_deadch-25percent/res_qvecs-corr", "2022-04-19_deadch-50percent/res_qvecs-corr",
+                    "2022-04-19_deadch-75percent/res_qvecs-corr"};
 TString files[ncent] = {"cent00-05.root", "cent05-10.root", "cent10-20.root",
                         "cent20-30.root", "cent30-40.root", "cent40-50.root",
                         "cent50-60.root", "cent60-80.root"};
 //TString files[ncent] = {"cent20-30.root"};
 TString detname[ndet] = {"FT0C", "FT0A"};
-TString legentry[nset] = {"no dead ch", "10 % dead ch", "25 % dead ch", "50 % dead ch"};
-EColor mColor[nset] = {kBlack, kMagenta, kRed, kBlue};
+TString legentry[nset] = {"no dead ch", "10 % dead ch", "25 % dead ch", "50 % dead ch", "75 % dead ch"};
+EColor mColor[nset] = {kBlack, kMagenta, kRed, kBlue, kOrange};
 
 // Leg coordinates
 double xi[ndet] = {0.20, 0.58};
@@ -153,6 +155,7 @@ void ConfigPlots()
             //gRes[idet]->GetYaxis()->CenterTitle();
             gRes[iset][idet]->GetYaxis()->SetRangeUser(0., 1.);
             gRes[iset][idet]->SetMarkerColor(mColor[iset]);
+            gRes[iset][idet]->SetLineColor(mColor[iset]);
             if (iset==0)
                 gRes[iset][idet]->SetMarkerStyle(kFullCircle);
             else

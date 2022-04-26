@@ -33,6 +33,7 @@ void InitOutput(TString outfile)
         outTree->SetBranchAddress("qvecFT0A", &qvecFT0A);
         outTree->SetBranchAddress("qvecFT0C", &qvecFT0C);
         outTree->SetBranchAddress("qvecFull", &qvecFull);
+        outTree->SetBranchAddress("qvecA", &qvecA);
         outTree->SetBranchAddress("qvecB", &qvecB);
         outTree->SetBranchAddress("qvecC", &qvecC);
         outTree->SetBranchAddress("tpcPhi", &tpcPhi);
@@ -42,6 +43,7 @@ void InitOutput(TString outfile)
         outTree->Branch("qvecFV0", &qvecFV0, Form("qvecFV0[%d]/F", nq));
         outTree->Branch("qvecFT0A", &qvecFT0A, Form("qvecFT0A[%d]/F", nq));
         outTree->Branch("qvecFT0C", &qvecFT0C, Form("qvecFT0C[%d]/F", nq));
+        outTree->Branch("qvecA", &qvecA, Form("QvecA[%d]/F", nq));
         outTree->Branch("qvecB", &qvecB, Form("QvecB[%d]/F", nq));
         outTree->Branch("qvecC", &qvecC, Form("QvecC[%d]/F", nq));
         outTree->Branch("qvecFull", &qvecC, Form("QvecFull[%d]/F", nq));
@@ -126,6 +128,7 @@ void FillQvectors()
         if (b < bmin || b > bmax) continue;
 
         FillQvecBC(ient);
+        FillQvecA(ient);
         fv0bcbegin = FillQvecFV0(ient, fv0bcbegin);
         ft0bcbegin = FillQvecFT0(ient, ft0bcbegin);
 
@@ -189,6 +192,37 @@ void FillQvecBC(UInt_t ient)
     qvecC[1] = QvecC.Im();
     qvecFull[0] = QvecFull.Re();
     qvecFull[1] = QvecFull.Im();
+}
+
+/** Use this if you want to use tracks as a 'perfect detector' **/
+void FillQvecA(UInt_t ient)
+{
+    fKineTree->GetEntry(ient);
+
+    TComplex QvecA(0);
+    int nTracksA = 0;
+    for (auto &t : *mctrack) {
+
+        if (t.GetPt() < 0.2 || t.GetPt() > 5.) continue;
+        if (bUseTPCeff && gRandom->Uniform(1.) > GetEffFromHisto(hCoeff, t.GetPt())) continue;
+
+        Int_t pid = t.GetPdgCode();
+        if (TDatabasePDG::Instance()->GetParticle(pid)==NULL) continue;
+        Double_t charge = TDatabasePDG::Instance()->GetParticle(pid)->Charge();
+        if (charge==0.0) continue;
+
+        double eta = t.GetEta();
+        double phi = TMath::ATan2(t.Py(), t.Px());
+
+        if ( (eta<-1. && eta>-6.) || (eta>1. && eta<6.) ) {
+            QvecA += TComplex(TMath::Cos(2.0 * phi), TMath::Sin(2.0 * phi));
+            nTracksA++;
+        }
+    }
+
+    QvecA /= (double)nTracksA;
+    qvecA[0] = QvecA.Re();
+    qvecA[1] = QvecA.Im();
 }
 
 int FillQvecFV0(UInt_t ient, int bcbegin)
