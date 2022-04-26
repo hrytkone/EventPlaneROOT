@@ -2,7 +2,7 @@
 #define CONST_H
 
 // Parameters to add dead channels to FT0, default no dead channels
-//const int ndeadch = 156;
+const int ndeadch = 1;
 const int deadch[ndeadch] = {-1}; // no dead channels
 
 // *** OLD VALUES ***

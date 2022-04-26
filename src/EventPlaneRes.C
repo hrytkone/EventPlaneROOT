@@ -15,6 +15,7 @@ void EventPlaneRes(TString infile, TString outfile)
 
         epB = GetEventPlane(qvecB[0], qvecB[1]);
         epC = GetEventPlane(qvecC[0], qvecC[1]);
+        epAtrue = GetEventPlane(qvecAtrue[0], qvecAtrue[1]);
         
         bool bKeepEvent = 1;
         for (int idet=0; idet<ndet; idet++) {
@@ -46,6 +47,7 @@ int LoadInput(TString infile)
         inTree->SetBranchAddress(Form("qvec%s",detName[idet].Data()), &qvecA[idet]);
     inTree->SetBranchAddress("qvecB", &qvecB);
     inTree->SetBranchAddress("qvecC", &qvecC);
+    inTree->SetBranchAddress("qvecA", &qvecAtrue);
     inTree->SetBranchAddress("tpcPhi", &tpcPhi);
 
     return 1;
@@ -57,6 +59,13 @@ void InitOutput(TString outfile)
     hEPB = new TH1D("hEPB", "hEPB", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
     hEPC = new TH1D("hEPC", "hEPC", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
     hRBC = new TH1D("hRBC", "hRBC", 400, -1.0, 1.0);
+    
+    /** For true v2 **/
+    hEPAtrue = new TH1D("hEPAtrue", "hEPAtrue", 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
+    hRABtrue = new TH1D("hRABtrue", "hRABtrue", 400, -1.0, 1.0);
+    hRACtrue = new TH1D("hRACtrue", "hRACtrue", 400, -1.0, 1.0);    
+    hVnObsTrue = new TH1D("hVnObsTrue", "hVnObsTrue", 400, -1.0, 1.0);
+
     for (int idet=0; idet<ndet; idet++) {
         hEPA[idet] = new TH1D(Form("hEPA_%s", detName[idet].Data()), Form("hEPA_%s", detName[idet].Data()), 200, -TMath::Pi()/2.0, TMath::Pi()/2.0);
         hRAB[idet] = new TH1D(Form("hRAB_%s", detName[idet].Data()), Form("hRAB_%s", detName[idet].Data()), 400, -1.0, 1.0);
@@ -94,4 +103,10 @@ void FillHistos()
     hRBC->Fill(TMath::Cos(2*(epB - epC)));
     hEPB->Fill(epB);
     hEPC->Fill(epC);
+
+    /** For true v2 **/
+    hRABtrue->Fill(TMath::Cos(2.*(epAtrue - epB)));
+    hRACtrue->Fill(TMath::Cos(2.*(epAtrue - epC)));
+    hEPAtrue->Fill(epAtrue);
+    hVnObsTrue->Fill(GetVnObs(epAtrue, 2.));
 }
