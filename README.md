@@ -4,9 +4,9 @@ Analysis code for calculating event plane resolution for FIT detectors (FV0 and 
 
 ## Usage:
 
- * ./saveQvecs <output.root> <\path\to\input> <some label> <docorrections>
- * ./calcCorrections <output.root> <\path\to\input> <some label>
- * ./calcEventPlaneRes <output.root> <\path\to\input> <some label> <docorrections>
+ * ./saveQvecs <output.root> <path to input> <some label> <docorrections>
+ * ./calcCorrections <output.root> <path to input> <some label>
+ * ./calcEventPlaneRes <output.root> <path to input> <some label> <docorrections>
 
 ## Comments
  * Basic workflow from the scratch has been the following:
