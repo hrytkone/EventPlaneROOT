@@ -17,3 +17,4 @@ Analysis code for calculating event plane resolution for FIT detectors (FV0 and 
     * Then calculate Q-vectors again but now with corrections. This is done automaticly when using script <code>calcEventPlaneRes</code> (<code>./calcEventPlaneRes qvecs_with-corr.root \path\to\indput\dir 10-20 1</code>)
         *  runs first saveQvecs and saves Q-vectors to output.root, output for resolutions is labeled as "res_qvecs_with-corr.root"
  * <code>calc-res-all.sh</code> and <code>calc-corr-all.sh</code> I've been using to run the code over all centralities at once
+ * Data for one 100 event run (centrality 10-20) can be found from <code>data</code> directory
