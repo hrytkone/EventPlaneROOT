@@ -5,15 +5,15 @@ Analysis code for calculating event plane resolution for FIT detectors (FV0 and 
 ## Usage:
 
  * ./saveQvecs <output.root> <\path\to\input> <comment> <docorrections>
-    * calculates Q-vectors from simulation files in given path (check the path if files not found). outputi.root the output file name, comment gives label to the correction files (for example cent class is good)
  * ./calcCorrections <output.root> <\path\to\input> <comment>
-    * same arguments as above, runs first saveQvecs and then calculates corrections from that output
-    * run this if no correction files exist or they need updating
- * ./calcEventPlaneRes <output.root> <\path\to\input> <correction file label> <docorrections>
-    * calculates the event planes and the components that are needed to calculate the resolution. These are saved into histograms for each detector
-    * runs first saveQvecs and saves Q-vectors to output.root, output for resolutions is labeled as "res_output.root"
+ * ./calcEventPlaneRes <output.root> <\path\to\input> <comment> <docorrections>
 
-
-## TO-DO
-
- * Nothing at this point
+## Comments
+ * Basic workflow from the scratch has been the following:
+    * Calculate the Q-vectors without any corrections (for example <code>./saveQvecs qvecs_no-corr.root \path\to\indput\dir 10-20 0</code>)
+        * In Puhti the input directory had several job directories (<code>PbPb_StandaloneAMPT_o2ver-21-10-12_cent10-20_5500GeV/dig_5Hz-mips8/run_jobY</code>) and <code>saveQvecs</code> reads it correctly if the root directory for the run (<code>PbPb_StandaloneAMPT_o2ver-21-10-12_cent10-20_5500GeV</code> in this case) is given. So if other path structure is used make necessary changes to <code>saveQvecs</code> script
+    * Calculate corrections from the uncorrected Q-vectors saved into <code>qvecs_no-corr.root</code> (<code>./calcCorrections qvecs_no-corr.root \path\to\indput\dir 10-20</code>)
+        * Corrections are saved to individual text file for each of the three detectors
+    * Then calculate Q-vectors again but now with corrections. This is done automaticly when using script <code>calcEventPlaneRes</code> (<code>./calcEventPlaneRes qvecs_with-corr.root \path\to\indput\dir 10-20 1</code>)
+        *  runs first saveQvecs and saves Q-vectors to output.root, output for resolutions is labeled as "res_qvecs_with-corr.root"
+ * <code>calc-res-all.sh</code> and <code>calc-corr-all.sh</code> I've been using to run the code over all centralities at once

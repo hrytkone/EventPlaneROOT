@@ -13,18 +13,18 @@ bool bDoCorrections = true;
 bool bUseTPCeff = true;
 TFile *fout;
 TTree *outTree;
-TFile *finTPCeff; // efficiency for TPC
+TFile *finTPCeff;           // efficiency for TPC
 TH1D* hCoeff;
 std::ifstream corrInFile;
 
 float corr[ndet][ncorr];
-float qvecFV0[nq];
-float qvecFT0A[nq];
-float qvecFT0C[nq];
-float qvecA[nq];
-float qvecB[nq];
-float qvecC[nq];
-float qvecFull[nq];
+float qvecFV0[nq];          // subevent A for FV0 (digits)
+float qvecFT0A[nq];         // subevent A for FT0A (digits)
+float qvecFT0C[nq];         // subevent A for FT0C (digits)
+float qvecA[nq];            // subevent A for 'ideal' calculation (MCTracks)
+float qvecB[nq];            // subevent B (0.1 < eta < 0.8) (MCTracks)
+float qvecC[nq];            // subevent C (-0.8 < eta < -0.1) (MCTracks)
+float qvecFull[nq];         // subevent B + subevent C
 std::vector<float> * tpcPhi = 0;
 
 TFile *finKine;

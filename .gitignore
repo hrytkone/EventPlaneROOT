@@ -1,4 +1,6 @@
 *.root
 *.log
 *.pdf
+*.eps
 !src/Eff-LHC16q-pPb_MC_LHC17f2b_fast_1154_20201205-1425.root
+!data/*.root

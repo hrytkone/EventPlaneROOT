@@ -5,20 +5,38 @@ TString colsys = "Pb#font[122]{-}Pb";
 TString energy = "5.5 TeV";
 
 float cent[ncent+1] = {0., 5., 10., 20., 30., 40., 50., 60., 80.};
-TString dir     = "data-v2_2022-02-09/res_qvecs-corr";
-TString dirtrue = "data-true-res_2022-02-23/res_qvecs-corr";
+//TString dir     = "2022-05-11_v2-true_no-corr_eta-1.2-7/res_qvecs-corr";
+//TString dir     = "2022-05-10_v2-true-corrected/res_qvecs-no-corr";
+TString dir     = "20220516_data/res_qvecs-corr";
+//TString dir     = "20220517_data-mctracks/res_qvecs-mctrack";
+//TString dir     = "data-v2_2022-02-09/res_qvecs-corr";
+//TString dirtrue = "20220516_data/res_qvecs-corr";
+//TString dirtrue = "data-true-res_2022-02-23/res_qvecs-corr";
 TString files[ncent] = {"cent00-05.root", "cent05-10.root", "cent10-20.root",
                         "cent20-30.root", "cent30-40.root", "cent40-50.root",
                         "cent50-60.root", "cent60-80.root"};
-TString detname[ndet] = {"FT0C", "FV0", "FT0A", "True"};
-TString legentry[ndet] = {"FT0-C", "FV0", "FT0-A", "True"};
-EColor mColor[ndet] = {kRed, kBlue, kBlack, kBlack};
+TString detname[ndet] = {"Ideal", "FT0C", "FV0", "FT0A"};
+TString legentry[ndet] = {"Ideal", "FT0-C", "FV0", "FT0-A"};
+int mColor[ndet] = {kBlue, kRed, kBlue, kBlack};
+
+float offset[ncent][ndet] = {
+    {0.,-.6,0.,.6},
+    {0.,-.6,0.,.6},
+    {0.,-.5,0.,.5},
+    {0.,-.5,0.,.5},
+    {0.,-.5,0.,.5},
+    {0.,-.5,0.,.5},
+    {0.,-.5,0.,.5},
+    {0.,-.5,0.,.5}
+};
 
 TFile *fin[ncent];
 TFile *fintrue[ncent];
 TH1D *hVnObs[ncent][ndet];
 TH1D *hRAB[ncent][ndet];
 TH1D *hRAC[ncent][ndet];
+TH1D *hRABtrue[ncent];
+TH1D *hRACtrue[ncent];
 TH1D *hRBC[ncent];
 TH1D *hRsub[ncent];
 TGraphErrors *gV2[ndet];
@@ -40,6 +58,7 @@ double RIter(double x0, double R0, double err);
 double CalculateRerror(double khi, double khiErr);
 void ConfigPlots();
 void PlotToCanvas();
+void RedrawBorder();
 
 void PlotV2()
 {
@@ -52,8 +71,13 @@ void PlotV2()
         for (int icent=0; icent<ncent; icent++) {
             GetResAndErr(icent, idet);
             GetV2AndErr(icent, idet);
-            gV2[idet]->SetPoint(icent, cent[icent] + (cent[icent+1]-cent[icent])/2., v2[idet][icent]);
-            gV2[idet]->SetPointError(icent, (cent[icent+1]-cent[icent])/2., v2Err[idet][icent]);
+            if (idet==0) {
+                gV2[idet]->SetPoint(icent, cent[icent] + (cent[icent+1]-cent[icent])/2., v2[idet][icent]);
+                gV2[idet]->SetPointError(icent, (cent[icent+1]-cent[icent])/2., v2Err[idet][icent]);
+            } else {
+                gV2[idet]->SetPoint(icent, cent[icent] + (1.+offset[icent][idet])*(cent[icent+1]-cent[icent])/2., v2[idet][icent]);
+                gV2[idet]->SetPointError(icent, 0., v2Err[idet][icent]);
+            }
         }
     }
 
@@ -68,16 +92,19 @@ void LoadData()
         fin[icent] = TFile::Open(Form("%s/%s", dir.Data(), files[icent].Data()));
 
         hRBC[icent] = (TH1D*)fin[icent]->Get("hRBC");
-        for (int idet=0; idet<ndet-1; idet++) {
+        for (int idet=1; idet<ndet; idet++) {
             hRAB[icent][idet]   = (TH1D*)fin[icent]->Get(Form("hRAB_%s", detname[idet].Data()));
             hRAC[icent][idet]   = (TH1D*)fin[icent]->Get(Form("hRAC_%s", detname[idet].Data()));
             hVnObs[icent][idet] = (TH1D*)fin[icent]->Get(Form("hVnObs_%s", detname[idet].Data()));
         }
 
         // Get "true" values
-        fintrue[icent]    = TFile::Open(Form("%s/%s", dirtrue.Data(), files[icent].Data()));
-        hRsub[icent]      = (TH1D*)fintrue[icent]->Get("hRsub");
-        hVnObs[icent][ndet-1] = (TH1D*)fintrue[icent]->Get("hVnObs");
+        //fintrue[icent]    = TFile::Open(Form("%s/%s", dirtrue.Data(), files[icent].Data()));
+        //hRsub[icent]      = (TH1D*)fin[icent]->Get("hRsub");
+        //hVnObs[icent][ndet-1] = (TH1D*)fin[icent]->Get("hVnObs");
+        hRABtrue[icent]      = (TH1D*)fin[icent]->Get("hRABtrue");
+        hRACtrue[icent]      = (TH1D*)fin[icent]->Get("hRACtrue");
+        hVnObs[icent][0] = (TH1D*)fin[icent]->Get("hVnObsTrue");
     }
 }
 
@@ -93,7 +120,7 @@ void SetStyle(Bool_t graypalette)
     else gStyle->SetPalette(1);
     gStyle->SetCanvasColor(10);
     gStyle->SetCanvasBorderMode(0);
-    gStyle->SetFrameLineWidth(1);
+    gStyle->SetFrameLineWidth(2);
     gStyle->SetFrameFillColor(kWhite);
     gStyle->SetPadColor(10);
     gStyle->SetPadTickX(0);
@@ -104,12 +131,12 @@ void SetStyle(Bool_t graypalette)
     gStyle->SetHistLineColor(kRed);
     gStyle->SetFuncWidth(2);
     gStyle->SetFuncColor(kGreen);
-    gStyle->SetLineWidth(1);
-    gStyle->SetLabelSize(0.035,"xyz");
+    gStyle->SetLineWidth(2);
+    gStyle->SetLabelSize(0.042,"xyz");
     gStyle->SetLabelOffset(0.01,"y");
     gStyle->SetLabelOffset(0.01,"x");
     gStyle->SetLabelColor(kBlack,"xyz");
-    gStyle->SetTitleSize(0.035,"xyz");
+    gStyle->SetTitleSize(0.042,"xyz");
     gStyle->SetTitleOffset(1.25,"y");
     gStyle->SetTitleOffset(1.2,"x");
     gStyle->SetTitleFillColor(kWhite);
@@ -125,7 +152,7 @@ void SetStyle(Bool_t graypalette)
 
 void GetResAndErr(int icent, int idet)
 {
-    if (idet < ndet-1) {
+    if (idet > 0) {
         float rab = hRAB[icent][idet]->GetMean();
         float rac = hRAC[icent][idet]->GetMean();
         float rbc = hRBC[icent]->GetMean();
@@ -136,17 +163,27 @@ void GetResAndErr(int icent, int idet)
         res[idet][icent] = TMath::Sqrt((rab * rac)/rbc);
         resErr[idet][icent] = 0.5*res[idet][icent]*TMath::Sqrt(TMath::Power(rabErr/rab, 2) + TMath::Power(racErr/rac, 2) + TMath::Power(rbcErr/rbc, 2));
     } else {
+        float rab = hRABtrue[icent]->GetMean();
+        float rac = hRACtrue[icent]->GetMean();
+        float rbc = hRBC[icent]->GetMean();
+        float rabErr = hRABtrue[icent]->GetMeanError();
+        float racErr = hRACtrue[icent]->GetMeanError();
+        float rbcErr = hRBC[icent]->GetMeanError();
+
+        res[idet][icent] = TMath::Sqrt((rab * rac)/rbc);
+        resErr[idet][icent] = 0.5*res[idet][icent]*TMath::Sqrt(TMath::Power(rabErr/rab, 2) + TMath::Power(racErr/rac, 2) + TMath::Power(rbcErr/rbc, 2));
+
         double khi0 = 0.5;
         double err = 0.0001;
 
         //res[idet][icent] = TMath::Sqrt(hRsub[icent]->GetMean());
-        double res0 = TMath::Sqrt(hRsub[icent]->GetMean());
-        double khi = RIter(khi0, res0, err);
-        cout << "\tKhi : " << khi << endl;
-        res[idet][icent] = R1(TMath::Sqrt(2)*khi);
+        //double res0 = TMath::Sqrt(hRsub[icent]->GetMean());
+        //double khi = RIter(khi0, res0, err);
+        //cout << "\tKhi : " << khi << endl;
+        //res[idet][icent] = R1(TMath::Sqrt(2)*khi);
 
         //resErr[idet][icent] = hRsub[icent]->GetMeanError()/(2.*TMath::Sqrt(hRsub[icent]->GetMean()));
-        resErr[idet][icent] = CalculateRerror(khi, err);
+        //resErr[idet][icent] = CalculateRerror(khi, err);
     }
     cout << "\tRes : " << res[idet][icent] << " +- " << resErr[idet][icent] << endl;
 }
@@ -193,24 +230,35 @@ double CalculateRerror(double khi, double khiErr) {
 
 void ConfigPlots()
 {
-    leg = new TLegend(0.4, 0.23, 0.52, 0.38);
-    leg->SetFillStyle(0); leg->SetBorderSize(0); leg->SetTextSize(0.035);
+    leg = new TLegend(0.4, 0.2, 0.72, 0.3);
+    leg->SetFillStyle(0); leg->SetBorderSize(0); leg->SetTextSize(gStyle->GetTextSize()*0.7);
+    leg->SetNColumns(2);
     //leg->SetHeader(Form("%s #sqrt{#it{s}_{NN}} = %s simulation", colsys.Data(), energy.Data()));
     for (int idet=0; idet<ndet; idet++) {
-        leg->AddEntry(gV2[idet], legentry[idet], "p");
         gV2[idet]->SetTitle("; centrality (%); v_{2}");
+        gV2[idet]->GetYaxis()->SetRangeUser(0.032, 0.1299);
         gV2[idet]->GetXaxis()->SetLabelSize(0.035);
         gV2[idet]->GetXaxis()->SetTitleSize(0.04);
         gV2[idet]->GetXaxis()->SetLimits(0., 80.);
         gV2[idet]->GetYaxis()->SetMaxDigits(4);
         gV2[idet]->GetYaxis()->SetLabelSize(0.035);
-        gV2[idet]->GetYaxis()->SetTitleSize(0.04);
+        gV2[idet]->GetYaxis()->SetTitleSize(0.05);
+        gV2[idet]->GetYaxis()->SetTitleOffset(0.8);
         //gV2[idet]->GetYaxis()->SetRangeUser(0., 1.);
         gV2[idet]->SetMarkerColor(mColor[idet]);
-        if (idet < ndet-1)
-            gV2[idet]->SetMarkerStyle(20);
-        else
-            gV2[idet]->SetMarkerStyle(kCircle);
+        gV2[idet]->SetLineColor(mColor[idet]);
+        if (idet==0) {
+            leg->AddEntry(gV2[idet], legentry[idet], "lef");
+            gV2[idet]->SetFillColor(mColor[idet]-10);
+            gV2[idet]->SetMarkerColor(mColor[idet]-8);
+            gV2[idet]->SetMarkerStyle(kDot);
+            gV2[idet]->SetLineColor(mColor[idet]-8);
+            gV2[idet]->SetLineWidth(1);
+        } else {
+            leg->AddEntry(gV2[idet], legentry[idet], "pe");
+            gV2[idet]->SetMarkerStyle(kOpenCircle);
+
+        }
     }
 }
 
@@ -218,10 +266,12 @@ void PlotToCanvas()
 {
     c1 = new TCanvas("c1", "c1", 800, 800);
     for (int idet=0; idet<ndet; idet++) {
-        if (idet==0)
-            gV2[idet]->Draw("AP");
-        else
+        if (idet==0) {
+            gV2[idet]->Draw("A2");
+            gV2[idet]->Draw("P");
+        } else {
             gV2[idet]->Draw("P SAME");
+        }
     }
     leg->Draw("SAME");
 
@@ -232,18 +282,30 @@ void PlotToCanvas()
     tex->SetTextFont(42);
     //tex->Draw();
 
-    TLatex * texsim1 = new TLatex(0.402,0.47, Form("%s #sqrt{#it{s}_{NN}} = %s simulation", colsys.Data(), energy.Data()));
+    TLatex * texsim1 = new TLatex(0.402,0.42, Form("%s #sqrt{#it{s}_{NN}} = %s simulation", colsys.Data(), energy.Data()));
     texsim1->SetNDC();
     texsim1->SetTextSize(0.035);
     texsim1->Draw();
 
-    TLatex * texsim2 = new TLatex(0.402,0.43, "-0.8 < #eta < 0.8");
+    TLatex * texsim2 = new TLatex(0.402,0.37, "-0.8 < #eta < 0.8");
     texsim2->SetNDC();
     texsim2->SetTextSize(0.035);
     texsim2->Draw();
 
-    TLatex * texsim3 = new TLatex(0.402,0.39, "0.2 GeV/c < p_{T} < 5.0 GeV/c");
+    TLatex * texsim3 = new TLatex(0.402,0.32, "0.2 GeV/c < p_{T} < 5.0 GeV/c");
     texsim3->SetNDC();
     texsim3->SetTextSize(0.035);
     texsim3->Draw();
+
+    RedrawBorder();
+    c1->SaveAs("v2-true.eps");
+}
+
+void RedrawBorder()
+{
+   gPad->Update();
+   gPad->RedrawAxis();
+   TLine l;
+   l.DrawLine(gPad->GetUxmin(), gPad->GetUymax(), gPad->GetUxmax(), gPad->GetUymax());
+   l.DrawLine(gPad->GetUxmax(), gPad->GetUymin(), gPad->GetUxmax(), gPad->GetUymax());
 }

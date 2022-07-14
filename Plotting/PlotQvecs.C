@@ -1,4 +1,4 @@
-const int nset = 4;
+const int nset = 1;
 const int ncorr = 2;
 const int nq = 2;
 
@@ -10,9 +10,10 @@ const double yf = 0.95;
 TString colsys = "Pb#font[122]{-}Pb";
 TString energy = "5.5 TeV";
 
-TString dir[nset] = {"data-v2_2022-02-09", "2022-03-10_deadch-20", "2022-03-10_deadch-50", "2022-03-10_deadch-100"};
+TString dir[nset]     = {"2022-05-10_v2-true-corrected"};
+//TString dir[nset] = {"data-v2_2022-02-09", "2022-03-10_deadch-20", "2022-03-10_deadch-50", "2022-03-10_deadch-100"};
 TString files[ncorr] = {"qvecs-no-corr/cent20-30.root", "qvecs-corr/cent20-30.root"};
-TString legentry[nset] = {"no dead ch", "10 dead ch", "25 dead ch", "50 dead ch"};
+TString legentry[nset] = {"no dead ch"};//, "10 dead ch", "25 dead ch", "50 dead ch"};
 
 double binMin[ncorr] = {-0.49, -9.99};
 double binMax[ncorr] = {0.49, 9.99};
@@ -21,12 +22,15 @@ TFile *fin[nset][ncorr];
 TTree *fTree[nset][ncorr];
 float qvecFT0A[nset][ncorr][nq];
 float qvecFT0C[nset][ncorr][nq];
+float qvecA[nset][ncorr][nq];
 TH2D *hQvecFT0A[nset][ncorr];
 TH2D *hQvecFT0C[nset][ncorr];
+TH2D *hQvecA[nset][ncorr];
 TH1D *hEPFT0A[nset][ncorr];
 TH1D *hEPFT0C[nset][ncorr];
 TCanvas *cFT0A;
 TCanvas *cFT0C;
+TCanvas *cA;
 TCanvas *cFT0Aep;
 TCanvas *cFT0Cep;
 TLegend *leg[nset][ncorr];
@@ -58,6 +62,7 @@ void LoadData()
             //fTree[iset][icorr]->Print();
             fTree[iset][icorr]->SetBranchAddress("qvecFT0A", &qvecFT0A[iset][icorr]);
             fTree[iset][icorr]->SetBranchAddress("qvecFT0C", &qvecFT0C[iset][icorr]);
+            fTree[iset][icorr]->SetBranchAddress("qvecA", &qvecA[iset][icorr]);
         }
     }
 }
@@ -110,6 +115,7 @@ void CreateHistos()
         for (int icorr=0; icorr<ncorr; icorr++) {
             hQvecFT0A[iset][icorr] = new TH2D(Form("hQvecFT0A_%d_%d", iset, icorr), "", 200, binMin[icorr], binMax[icorr], 200, binMin[icorr], binMax[icorr]);
             hQvecFT0C[iset][icorr] = new TH2D(Form("hQvecFT0C_%d_%d", iset, icorr), "", 200, binMin[icorr], binMax[icorr], 200, binMin[icorr], binMax[icorr]);
+            hQvecA[iset][icorr] = new TH2D(Form("hQvecA_%d_%d", iset, icorr), "", 200, binMin[icorr], binMax[icorr], 200, binMin[icorr], binMax[icorr]);
             hEPFT0A[iset][icorr] = new TH1D(Form("hEPFT0A_%d_%d", iset, icorr), "", (int)TMath::Pi()/0.1, -TMath::Pi()/2., TMath::Pi()/2.);
             hEPFT0A[iset][icorr]->Sumw2();
             hEPFT0C[iset][icorr] = new TH1D(Form("hEPFT0C_%d_%d", iset, icorr), "", (int)TMath::Pi()/0.1, -TMath::Pi()/2., TMath::Pi()/2.);
@@ -119,6 +125,7 @@ void CreateHistos()
                 fTree[iset][icorr]->GetEntry(ient);
                 hQvecFT0A[iset][icorr]->Fill(qvecFT0A[iset][icorr][0], qvecFT0A[iset][icorr][1]);
                 hQvecFT0C[iset][icorr]->Fill(qvecFT0C[iset][icorr][0], qvecFT0C[iset][icorr][1]);
+                hQvecA[iset][icorr]->Fill(qvecA[iset][icorr][0], qvecA[iset][icorr][1]);
                 hEPFT0A[iset][icorr]->Fill(GetEventPlane(qvecFT0A[iset][icorr][0], qvecFT0A[iset][icorr][1]));
                 hEPFT0C[iset][icorr]->Fill(GetEventPlane(qvecFT0C[iset][icorr][0], qvecFT0C[iset][icorr][1]));
             }
@@ -142,6 +149,7 @@ void ConfigPlots()
 
             hQvecFT0A[iset][icorr]->SetTitle(";Q_{x};Q_{y}");
             hQvecFT0C[iset][icorr]->SetTitle(";Q_{x};Q_{y}");
+            hQvecA[iset][icorr]->SetTitle(";Q_{x};Q_{y}");
 
             leg[iset][icorr] = new TLegend(xi, yi, xf, yf);
             leg[iset][icorr]->SetFillStyle(0); leg[iset][icorr]->SetBorderSize(0); leg[iset][icorr]->SetTextSize(gStyle->GetTextSize()*1.2);
@@ -179,6 +187,20 @@ void PlotToCanvas()
             gPad->SetRightMargin(0.05);
             gPad->SetTopMargin(0.05);
             hQvecFT0C[iset][icorr]->Draw("COL");
+            leg[iset][icorr]->Draw("SAME");
+        }
+    }
+
+    cA = new TCanvas("cA", "cA", 1600, 800);
+    cA->Divide(4,2,0.001,0.001);
+    for (int icorr=0; icorr<ncorr; icorr++) {
+        for (int iset=0; iset<nset; iset++) {
+            cA->cd(icorr*nset + iset + 1);
+            gPad->SetLeftMargin(0.1);
+            gPad->SetBottomMargin(0.1);
+            gPad->SetRightMargin(0.05);
+            gPad->SetTopMargin(0.05);
+            hQvecA[iset][icorr]->Draw("COL");
             leg[iset][icorr]->Draw("SAME");
         }
     }

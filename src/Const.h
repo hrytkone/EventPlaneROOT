@@ -4,23 +4,7 @@
 // Parameters to add dead channels to FT0, default no dead channels
 const int ndeadch = 1;
 const int deadch[ndeadch] = {-1}; // no dead channels
-
-// *** OLD VALUES ***
-//const int deadch[ndeadch] = { // 10+10 dead channels
-//    54,53,41,45,0,94,92,9,15,27,179,162,199,202,118,174,139,159,124,153};
-//const int deadch[ndeadch] = { // 25+25 dead channels
-//    5,52,46,19,15,23,21,58,17,1,56,78,66,64,79,32,6,38,11,77,44,41,67,93,3,144,
-//    158,119,179,139,163,146,190,100,170,206,176,164,150,172,151,131,128,134,
-//    124,111,198,153,201,137};
-//const int deadch[ndeadch] = { // 50+50 dead channels
-//    160,120,178,185,135,166,107,187,189,147,101,149,97,202,173,164,119,124,161,127,
-//    126,172,146,109,118,100,132,163,198,112,179,186,144,156,201,103,151,139,96,106,
-//    133,171,131,188,203,136,121,122,142,168,51,6,8,78,9,86,40,52,15,66,22,43,0,80,
-//    53,89,61,58,72,76,82,73,17,49,67,10,11,39,47,31,63,48,65,87,92,74,91,42,27,60,
-//    64,24,45,84,26,12,13,68,75,85};
-
-// *** NEW VALUES ***
-//const int deadch[ndeadch] = { // 10+11=21 (10%)
+//const int deadch[ndeadch] = { // 10+11=21 (10%) (First number is dead ch in FT0A, second FT0C)
 //    5,68,94,13,8,7,83,81,29,25,123,108,121,149,136,134,195,143,177,113,105};
 //const int deadch[ndeadch] = { // 24+28=52 (25%)
 //    33,13,24,69,19,63,23,51,2,12,17,67,35,48,25,87,5,60,27,44,21,
@@ -46,6 +30,7 @@ const int deadch[ndeadch] = {-1}; // no dead channels
 const int nchft0a = 96;
 const int nchft0c = 112;
 
+// x and y coordinates of the centers of FT0 channels
 const float ft0ax[nchft0a] = {
     5.7998, 8.7488, 8.7488, 5.7998,
     7.5745, 4.6255, 7.5745, 4.6255,

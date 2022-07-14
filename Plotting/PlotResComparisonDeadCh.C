@@ -16,14 +16,15 @@ TString files[ncent] = {"cent00-05.root", "cent05-10.root", "cent10-20.root",
                         "cent50-60.root", "cent60-80.root"};
 //TString files[ncent] = {"cent20-30.root"};
 TString detname[ndet] = {"FT0C", "FT0A"};
+TString detnameLeg[ndet] = {"FT0-C", "FT0-A"};
 TString legentry[nset] = {"no dead ch", "10 % dead ch", "25 % dead ch", "50 % dead ch", "75 % dead ch"};
-EColor mColor[nset] = {kBlack, kMagenta, kRed, kBlue, kOrange};
+int mColor[nset] = {kBlack, kMagenta-4, kRed, kBlue, kOrange+1};
 
 // Leg coordinates
-double xi[ndet] = {0.20, 0.58};
-double yi[ndet] = {0.20, 0.61};
-double xf[ndet] = {0.45, 0.72};
-double yf[ndet] = {0.42, 0.82};
+double xi[ndet] = {0.18, 0.18};
+double yi[ndet] = {0.72, 0.72};
+double xf[ndet] = {0.72, 0.72};
+double yf[ndet] = {0.88, 0.88};
 
 TFile *fin[nset][ncent];
 TH1D *hRAB[nset][ncent][ndet];
@@ -92,7 +93,7 @@ void SetStyle(Bool_t graypalette)
     else gStyle->SetPalette(1);
     gStyle->SetCanvasColor(10);
     gStyle->SetCanvasBorderMode(0);
-    gStyle->SetFrameLineWidth(1);
+    gStyle->SetFrameLineWidth(2);
     gStyle->SetFrameFillColor(kWhite);
     gStyle->SetPadColor(10);
     gStyle->SetPadTickX(0);
@@ -103,13 +104,13 @@ void SetStyle(Bool_t graypalette)
     gStyle->SetHistLineColor(kRed);
     gStyle->SetFuncWidth(2);
     gStyle->SetFuncColor(kGreen);
-    gStyle->SetLineWidth(1);
-    gStyle->SetLabelSize(0.035,"xyz");
+    gStyle->SetLineWidth(2);
+    gStyle->SetLabelSize(0.042,"xyz");
     gStyle->SetLabelOffset(0.01,"y");
     gStyle->SetLabelOffset(0.01,"x");
     gStyle->SetLabelColor(kBlack,"xyz");
-    gStyle->SetTitleSize(0.035,"xyz");
-    gStyle->SetTitleOffset(1.25,"y");
+    gStyle->SetTitleSize(0.042,"xyz");
+    gStyle->SetTitleOffset(0.75,"y");
     gStyle->SetTitleOffset(1.2,"x");
     gStyle->SetTitleFillColor(kWhite);
     gStyle->SetTextSizePixels(26);
@@ -132,6 +133,7 @@ void GetResAndErr(int iset, int icent, int idet)
     float rbcErr = hRBC[iset][icent]->GetMeanError();
 
     res[iset][idet][icent] = TMath::Sqrt((rab * rac)/rbc);
+    if (!res[iset][idet][icent]) res[iset][idet][icent]=-1.;
     resErr[iset][idet][icent] = 0.5*res[iset][idet][icent]*TMath::Sqrt(TMath::Power(rabErr/rab, 2) + TMath::Power(racErr/rac, 2) + TMath::Power(rbcErr/rbc, 2));
 
     cout << "\tRes : " << res[iset][idet][icent] << " +- " << resErr[iset][idet][icent] << endl;
@@ -141,10 +143,10 @@ void ConfigPlots()
 {
     for (int idet=0; idet<ndet; idet++) {
         leg[idet] = new TLegend(xi[idet], yi[idet], xf[idet], yf[idet]);
+        leg[idet]->SetNColumns(2);
         leg[idet]->SetFillStyle(0); leg[idet]->SetBorderSize(0); leg[idet]->SetTextSize(gStyle->GetTextSize()*0.65);
-        leg[idet]->SetHeader(Form("%s #sqrt{#it{s}_{NN}} = %s", colsys.Data(), energy.Data()));
+        leg[idet]->SetHeader(Form("O^{2} simulation for %s, %s #sqrt{#it{s}_{NN}} = %s", detnameLeg[idet].Data(), colsys.Data(), energy.Data()));
         for (int iset=0; iset<nset; iset++) {
-            leg[idet]->AddEntry(gRes[iset][idet], legentry[iset], "p");
             gRes[iset][idet]->SetTitle("; centrality (%); R_{2}");
             //gRes[idet]->GetXaxis()->SetLabelSize(0.025);
             //gRes[idet]->GetXaxis()->SetTitleSize(0.025);
@@ -153,13 +155,14 @@ void ConfigPlots()
             //gRes[idet]->GetYaxis()->SetLabelSize(0.025);
             //gRes[idet]->GetYaxis()->SetTitleSize(0.025);
             //gRes[idet]->GetYaxis()->CenterTitle();
-            gRes[iset][idet]->GetYaxis()->SetRangeUser(0., 1.);
+            gRes[iset][idet]->GetYaxis()->SetRangeUser(0., 1.18);
             gRes[iset][idet]->SetMarkerColor(mColor[iset]);
             gRes[iset][idet]->SetLineColor(mColor[iset]);
             if (iset==0)
                 gRes[iset][idet]->SetMarkerStyle(kFullCircle);
             else
                 gRes[iset][idet]->SetMarkerStyle(kOpenCircle);
+            leg[idet]->AddEntry(gRes[iset][idet], legentry[iset], "pe");
         }
     }
 }
@@ -179,6 +182,7 @@ void PlotToCanvas()
         TLatex * texsim = new TLatex(xi[idet],yf[idet]+0.01, Form("Simulation for %s", detname[idet].Data()));
         texsim->SetNDC();
         texsim->SetTextSize(gStyle->GetTextSize()*0.65);
-        texsim->Draw();
+        //texsim->Draw();
+        c1[idet]->SaveAs(Form("deadch_res-comparison_%s.eps", detname[idet].Data()));
     }
 }
